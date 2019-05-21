@@ -2,6 +2,7 @@
 
 CS Capstone - Bluetooth Bracelets
 
+---
 ## Team Members
 |  Member       | Primary Role  | Backup Role  |
 |:-------------:|:-------------:|:------------:|
@@ -11,9 +12,9 @@ CS Capstone - Bluetooth Bracelets
 |Edward Koroteev|   Prototyping |              |
 |Ben Portis     | Git Master    | Back-end     |
 |Lucas Phillips |  Back-end     |              |
-|Ian            |  Front-end    |              |
+|Ian O'Brien    |  Front-end    |              |
 
 ## Sponsor
 Dan (Simmons?)
-
+---
 ## 
