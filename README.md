@@ -15,6 +15,6 @@ CS Capstone - Bluetooth Bracelets
 |Ian O'Brien    |  Front-end    |              |
 
 ## Sponsor
-Dan (Simmons?)
+Dan Hahn
 ---
 ## 
