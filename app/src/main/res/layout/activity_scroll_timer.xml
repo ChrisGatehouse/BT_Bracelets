@@ -8,21 +8,34 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="bt.bracelet.android.capstone.TimerScrollActivity" >
 
+
     <NumberPicker
         android:id="@+id/numberPicker1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/numberPicker2"
+        />
+    <NumberPicker
+        android:id="@+id/numberPicker2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
+        />
+    <NumberPicker
+        android:id="@+id/numberPicker3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/numberPicker2"
         />
 
     <TextView
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/numberPicker1"
+        android:layout_below="@+id/numberPicker2"
         android:layout_centerHorizontal="true"
-        android:text="Selected Number Display here"
+        android:text="Timer Initialised"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:gravity="center"/>
 
