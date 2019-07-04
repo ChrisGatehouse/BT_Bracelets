@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2018, Nordic Semiconductor
+  ~ Copyright (c) 2019, CapstoneB
   ~ All rights reserved.
   ~
   ~ Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -42,6 +42,14 @@
 		android:label="@string/app_name"
 		android:theme="@style/AppTheme"
 		tools:ignore="GoogleAppIndexingWarning">
+		<activity
+			android:name="bt.bracelet.android.capstone.TimerScrollActivity"
+			android:launchMode="singleTop">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN"/>
+				<category android:name="android.intent.category.LAUNCHER"/>
+			</intent-filter>
+		</activity>
 		<activity
 			android:name=".SplashScreenActivity"
 			android:theme="@style/AppTheme.SplashScreen"
