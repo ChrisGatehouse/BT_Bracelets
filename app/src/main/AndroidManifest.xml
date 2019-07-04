@@ -43,6 +43,15 @@
 		android:theme="@style/AppTheme"
 		tools:ignore="GoogleAppIndexingWarning">
 		<activity
+			android:name="bt.bracelet.android.capstone.TimerScrollActivity"
+			android:noHistory="true"
+			android:launchMode="singleTop">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN"/>
+				<category android:name="android.intent.category.LAUNCHER"/>
+			</intent-filter>
+		</activity>
+		<activity
 			android:name=".SplashScreenActivity"
 			android:theme="@style/AppTheme.SplashScreen"
 			android:noHistory="true"
