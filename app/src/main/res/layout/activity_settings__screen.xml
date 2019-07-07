@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp"
+    android:orientation="vertical"
+    tools:context="bt.bracelet.android.capstone.Settings_Screen">
+
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Bluetooth Options"
+        android:id="@+id/bluetooth"
+        />
+    <!-- <android.support.v7.widget.SwitchCompat
+         android:id="@+id/bluetooth_switch"
+         android:layout_width="match_parent"
+         android:layout_height="84dp"
+         android:summary="Toggle on/off bluetooth"
+         android:text="Bluetooth"
+         android:defaultValue= "true"
+         /> -->
+
+
+    <!-- <android.support.v7.widget.SwitchCompat
+         android:id="@+id/switch_2"
+         android:layout_width="match_parent"
+         android:layout_height="84dp"
+         android:text="Switch_2"
+         android:layout_below="@+id/bluetooth"
+         android:summary="Toggle on/off bluetooth"
+         />
+ -->
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/back_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:srcCompat="@drawable/ic_arrow_back" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textColor="@android:color/black"
+        android:layout_below="@id/bluetooth"
+        android:id="@+id/colorText"
+        android:text="Change Watch Color"/>
+
+    <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/colorText"
+        android:id="@+id/colors"
+        android:orientation="vertical">
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/red"
+            android:text="Red"
+            />
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/blue"
+            android:text="Blue"
+            />
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/green"
+            android:text="Green"
+            />
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/purple"
+            android:text="Purple"
+            />
+
+    </RadioGroup>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/colors"
+        android:id="@+id/colorButton"
+        android:text = "Change"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="logout"
+        android:id="@+id/logout"
+        android:layout_below="@+id/colorButton"/>
+
+
+</RelativeLayout>
+
+
