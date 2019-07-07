@@ -24,12 +24,19 @@ public class Settings_Screen extends AppCompatActivity {
     private RadioButton colorOption; //radio button of the currently checked color
     private Button colorButton; // button to change the color of the watch LED's on-click
     private SharedPreferences preferences;
+    private SharedPreferences.Editor editor;
     private Button logout;//button to log the user out of the app
+    private int selectedColor;
+    private static final String preferenceFile = "bt.bracelet.android.capstone";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings__screen);
+        preferences = getSharedPreferences(preferenceFile,MODE_PRIVATE);
+        selectedColor = preferences.getInt("color",selectedColor);
+        colorOption = findViewById(selectedColor);
+        colorOption.setChecked(true);
 
 
         //bluetooth menu screen
@@ -67,9 +74,13 @@ public class Settings_Screen extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //search the group for the ID of the button checked
-                int selectedColor = colors.getCheckedRadioButtonId();
+                selectedColor = colors.getCheckedRadioButtonId();
                 //find the button via the ID returned
                 colorOption = findViewById(selectedColor);
+                colorOption.setChecked(true);
+                editor = preferences.edit();
+                editor.putInt("color", selectedColor);
+                editor.apply();
 
                 //set the color of the watch LED's here to specified color
             }
