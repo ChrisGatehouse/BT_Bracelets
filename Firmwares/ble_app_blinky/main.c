@@ -1,4 +1,3 @@
-//Testing commit
 /**
  * Copyright (c) 2015 - 2019, Nordic Semiconductor ASA
  *
