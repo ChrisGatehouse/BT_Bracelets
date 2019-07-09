@@ -277,15 +277,15 @@ static void led_write_handler(uint16_t conn_handle, ble_lbs_t * p_lbs, uint8_t l
     if (led_state)
     {
         bsp_board_led_on(LEDBUTTON_LED);
-        nrf_gpio_pin_write(MAIN_LED, 0);
-        nrf_gpio_pin_write(SECOND_LED, 0);
+        nrf_gpio_pin_write(MAIN_LED, led_state);
+        nrf_gpio_pin_write(SECOND_LED, led_state);
         NRF_LOG_INFO("Received LED ON!");
     }
     else
     {
         bsp_board_led_off(LEDBUTTON_LED);
-        nrf_gpio_pin_write(MAIN_LED, 1);
-        nrf_gpio_pin_write(SECOND_LED, 1);
+        nrf_gpio_pin_write(MAIN_LED, led_state);
+        nrf_gpio_pin_write(SECOND_LED, led_state);
         NRF_LOG_INFO("Received LED OFF!");
     }
 }
