@@ -4,26 +4,64 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context="bt.bracelet.android.capstone.Timer_Screen">
 
-    <TextView
-        android:id="@+id/text_view_countdown"
+    <NumberPicker
+        android:id="@+id/numberPicker1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:text="Welcome!"
-        android:textColor="@android:color/black"
-        android:textSize="60sp"
+        android:layout_toLeftOf="@+id/numberPicker2"
+        />
+    <NumberPicker
+        android:id="@+id/numberPicker2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text="min"
+
+        />
+    <NumberPicker
+        android:id="@+id/numberPicker3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/numberPicker2"
         />
 
+
+-->
     <Button
         android:id="@+id/start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/numberPicker2"
         android:text="start_timer" />
+    <!--<TextView
+        android:id="@+id/text_view_countdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/start"
+        android:text="Timer"
+        android:textColor="@android:color/black"
+        android:textSize="60sp"
+        /> 0-->
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/start"
+        android:text=""
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:gravity="center"/>
+    <!-- android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true" -->
 
     <Button
         android:id="@+id/reset"

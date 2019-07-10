@@ -13,19 +13,25 @@
         android:id="@+id/numberPicker1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:layout_toLeftOf="@+id/numberPicker2"
         />
     <NumberPicker
         android:id="@+id/numberPicker2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+
         android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+
         />
     <NumberPicker
         android:id="@+id/numberPicker3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/numberPicker2"
         />
 
