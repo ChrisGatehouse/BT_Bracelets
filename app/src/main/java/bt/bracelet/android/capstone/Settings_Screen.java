@@ -3,6 +3,7 @@ package bt.bracelet.android.capstone;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
@@ -14,6 +15,8 @@ import androidx.appcompat.widget.SwitchCompat;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import no.nordicsemi.android.blinky.R;
+
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 
 public class Settings_Screen extends AppCompatActivity {
@@ -27,6 +30,7 @@ public class Settings_Screen extends AppCompatActivity {
     private SharedPreferences.Editor editor;
     private Button logout;//button to log the user out of the app
     private int selectedColor;
+    private int defaultColor;
     private static final String preferenceFile = "bt.bracelet.android.capstone";
 
     @Override
@@ -34,10 +38,15 @@ public class Settings_Screen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings__screen);
         preferences = getSharedPreferences(preferenceFile,MODE_PRIVATE);
-        selectedColor = preferences.getInt("color",selectedColor);
-        colorOption = findViewById(selectedColor);
-        colorOption.setChecked(true);
+        //PreferenceManager.getDefaultSharedPreferences(this);//getSharedPreferences(preferenceFile,MODE_PRIVATE);
 
+        colors = findViewById(R.id.colors);
+        defaultColor = colors.getCheckedRadioButtonId();
+        colorButton = findViewById(R.id.colorButton);
+        selectedColor = preferences.getInt("color",defaultColor);
+        colorOption = findViewById(selectedColor);
+        ;//findViewById(selectedColor);
+        colorOption.setChecked(true);
 
         //bluetooth menu screen
         bluetooth = findViewById(R.id.bluetooth);
@@ -68,8 +77,8 @@ public class Settings_Screen extends AppCompatActivity {
         });
 
         //color options
-        colors = findViewById(R.id.colors);
-        colorButton = findViewById(R.id.colorButton);
+
+
         colorButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

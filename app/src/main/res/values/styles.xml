@@ -31,6 +31,10 @@
 	<!-- Base application theme. -->
 	<style name="AppTheme" parent="AppTheme.Base">
 		<!-- Customize your theme here. -->
+
+	</style>
+	<style name = "NumberPickerText">
+		<item name ="android:textSize">22sp</item>
 	</style>
 
 	<style name="AppTheme.Base" parent="Theme.MaterialComponents.Light.NoActionBar">

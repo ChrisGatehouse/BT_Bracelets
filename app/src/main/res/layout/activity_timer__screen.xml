@@ -13,6 +13,7 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@+id/numberPicker2"
+        android:theme="@style/NumberPickerText"
         />
     <NumberPicker
         android:id="@+id/numberPicker2"
@@ -20,6 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
+        android:theme="@style/NumberPickerText"
 
         />
     <NumberPicker
@@ -29,6 +31,7 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/numberPicker2"
+        android:theme="@style/NumberPickerText"
         />
 
 
