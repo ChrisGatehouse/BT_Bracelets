@@ -31,6 +31,7 @@ public class Timer_Screen extends AppCompatActivity {
     private NumberPicker secondPicker;
     private TextView textView;
 
+    //global time for the reset.
     private int hours;
     private int seconds;
     private int minutes;
@@ -41,10 +42,10 @@ public class Timer_Screen extends AppCompatActivity {
         setContentView(R.layout.activity_timer__screen);
 
 
-        //countdown = findViewById(R.id.text_view_countdown);
+        countdown = findViewById(R.id.text_view_countdown);
         startButton = findViewById(R.id.start);
         resetButton = findViewById(R.id.reset);
-        reserved1Button = findViewById(R.id.reserved1);
+        reserved1Button = findViewById(R.id.reserved1);//currently used to navigate to settings page
         reserved2Button = findViewById(R.id.reserved2);
 
 
@@ -53,25 +54,27 @@ public class Timer_Screen extends AppCompatActivity {
         minutePicker = findViewById(R.id.numberPicker2);
         secondPicker = findViewById(R.id.numberPicker3);
 
+        //outputs the "timer for....."
         textView = findViewById(R.id.textView1);
 
+        //set number picker values
         hourPicker.setMinValue(0);
         hourPicker.setMaxValue(23);
         minutePicker.setMinValue(0);
         minutePicker.setMaxValue(59);
         secondPicker.setMinValue(0);
         secondPicker.setMaxValue(59);
+
+        //if we scroll, obtain the value it was scrolled to.
         hourPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 if(timerRunning){
-                    stopTimer();
+                    stopTimer();//not currently used at all.. unless we want to
+                    //keep the scrollable options up on the screen.
                 }
-                int hours = hourPicker.getValue();
-                int minutes =  minutePicker.getValue();
-                int seconds = secondPicker.getValue();
 
-                String message = timerString(hours,minutes,seconds);
+                String message = timerString();
                 textView.setText(message);
             }
         });
@@ -81,13 +84,8 @@ public class Timer_Screen extends AppCompatActivity {
                 if(timerRunning){
                     stopTimer();
                 }
-                //int minutes = hourPicker.getValue() * 60 + newVal;
-               // int seconds = secondPicker.getValue();
-                int hours = hourPicker.getValue();
-                int minutes =  minutePicker.getValue();
-                int seconds = secondPicker.getValue();
 
-                String message = timerString(hours,minutes,seconds);
+                String message = timerString();
                 textView.setText(message);
             }
         });
@@ -97,11 +95,8 @@ public class Timer_Screen extends AppCompatActivity {
                 if(timerRunning){
                     stopTimer();
                 }
-                int hours = hourPicker.getValue();
-                int minutes =  minutePicker.getValue();
-                int seconds = secondPicker.getValue();
 
-                String message = timerString(hours,minutes,seconds);
+                String message = timerString();
                 textView.setText(message);
             }
         });
@@ -147,7 +142,13 @@ public class Timer_Screen extends AppCompatActivity {
         });
     }
 
-    public String timerString(int hours, int minutes, int seconds){
+    //obtains the current values that the number picker is scrolled through and will output
+    //to user how long they are setting the timer for.
+    public String timerString(){
+        hours = hourPicker.getValue();
+        minutes =  minutePicker.getValue();
+        seconds = secondPicker.getValue();
+
         String message = "Timer for ";//"Timer for " + minutes + " minutes and " + seconds + " seconds";
         if(hours > 0) {
             message += hours + " hours ";
@@ -167,10 +168,16 @@ public class Timer_Screen extends AppCompatActivity {
             stopTimer();
         }
         else {
-
+            /*
             hours = hourPicker.getValue();
             minutes = minutePicker.getValue();
-            seconds = secondPicker.getValue();
+            seconds = secondPicker.getValue();*/
+
+            textView.setVisibility(View.INVISIBLE);
+            hourPicker.setVisibility(View.INVISIBLE);
+            minutePicker.setVisibility(View.INVISIBLE);
+            secondPicker.setVisibility(View.INVISIBLE);
+            countdown.setVisibility(View.VISIBLE);
 
             timeLeft= TimeUnit.HOURS.toMillis(hours)+TimeUnit.MINUTES.toMillis(minutes)+TimeUnit.SECONDS.toMillis(seconds);
             timeLeftInMilliseconds = timeLeft;
@@ -204,24 +211,39 @@ public class Timer_Screen extends AppCompatActivity {
         timerRunning = true;
     }
 
-
+//stopTimer will cancel the current timer, and set the number scrolls back to visible.
+    //Timer scrolls will also be reset to default '0' values. Countdown timer will disappear.
     public void stopTimer(){
+        //cancel current timer
         countDownTimer.cancel();
+        //update button
         startButton.setText("start");
+
+        //reset the number pickers to default value.
         hourPicker.setValue(0);
         minutePicker.setValue(0);
         secondPicker.setValue(0);
         timerRunning = false;
+
+        //set visibility of scroll and countdown timer
+        textView.setVisibility(View.VISIBLE);
+        countdown.setVisibility(View.INVISIBLE);
+        hourPicker.setVisibility(View.VISIBLE);
+        minutePicker.setVisibility(View.VISIBLE);
+        secondPicker.setVisibility(View.VISIBLE);
+
         textView.setText("");
     }
 
-
+//updates the timer each second.
     public void updateTimer(){
-        timeLeftText = "";//"time left" + timeLeftInMilliseconds;
+        timeLeftText = "";
+        //convert milliseconds to seconds,mins,hours.
         long newseconds = (timeLeftInMilliseconds / 1000) % 60 ;
         long newminutes = ((timeLeftInMilliseconds / (1000*60)) % 60);
         long newhours   = ((timeLeftInMilliseconds / (1000*60*60)) % 24);
 
+        //ensure that each time will have a leading 0 if shorter than 10, for a nicer view.
         if(newhours < 10)
             timeLeftText="0";
         timeLeftText += newhours+":";
@@ -234,17 +256,30 @@ public class Timer_Screen extends AppCompatActivity {
         if(newseconds < 10) timeLeftText += "0";
         timeLeftText += newseconds;
 
-        /*countdown.setText(timeLeftText);*/
-        textView.setText(timeLeftText);
+        countdown.setText(timeLeftText);
     }
 
-
+//resets the current timer.
     public void resetTimer(){
-        stopTimer();
+        onreset();
+        //reset the timer to the original time.
         timeLeftInMilliseconds = timeLeft;
-        hourPicker.setValue(hours);
-        minutePicker.setValue(minutes);
-        secondPicker.setValue(seconds);
+        startButton.setText("start");
         updateTimer();
+    }
+
+    //used on timer reset so that the scrollers arent pulled back up. This
+    //will reset the countdown timer to the original time the scroll was set to.
+
+    public void onreset(){
+        //cancel currently running timer
+        countDownTimer.cancel();
+
+        //output how long timer will be set to
+        if(timerRunning) {
+            String message = timerString();
+            textView.setText(message);
+        }
+        timerRunning=false;
     }
 }
