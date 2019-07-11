@@ -86,19 +86,42 @@
         android:text=""
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:gravity="center"/>
-    <Button
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/reserved1"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:text="reserved1"/>
-    <Button
+        android:layout_alignParentRight="true"
+        app:srcCompat="@drawable/ic_settings"
+        />
+   <!-- <Button
         android:id="@+id/reserved2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
-        android:text="reserved2"/>
+        android:text="reserved2"/> -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/Schedule"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Schedule" />
+
+        <Button
+            android:id="@+id/Ping"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Ping" />
+
+    </LinearLayout>
 
 </RelativeLayout>

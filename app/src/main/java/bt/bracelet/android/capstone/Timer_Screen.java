@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.util.concurrent.TimeUnit;
 
 import no.nordicsemi.android.blinky.R;
@@ -21,7 +23,8 @@ public class Timer_Screen extends AppCompatActivity {
     private Button startButton;
     private Button resetButton;
     private Button reserved1Button;
-    private Button reserved2Button;
+    private Button schedule;
+    private Button ping;
     private CountDownTimer countDownTimer;
     private long timeLeftInMilliseconds = 0;//timeLeft;    // 10 seconds
     private boolean timerRunning;
@@ -30,12 +33,15 @@ public class Timer_Screen extends AppCompatActivity {
     private NumberPicker minutePicker;
     private NumberPicker secondPicker;
     private TextView textView;
+    private FloatingActionButton settingsButton;
 
     //global time for the reset.
     private int hours;
     private int seconds;
     private int minutes;
     private String timeLeftText;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,8 +51,10 @@ public class Timer_Screen extends AppCompatActivity {
         countdown = findViewById(R.id.text_view_countdown);
         startButton = findViewById(R.id.start);
         resetButton = findViewById(R.id.reset);
-        reserved1Button = findViewById(R.id.reserved1);//currently used to navigate to settings page
-        reserved2Button = findViewById(R.id.reserved2);
+        settingsButton = findViewById(R.id.reserved1);//currently used to navigate to settings page
+        schedule = findViewById(R.id.Schedule);
+        ping = findViewById(R.id.Ping);
+
 
 
         //From timer scroll screen
@@ -123,7 +131,7 @@ public class Timer_Screen extends AppCompatActivity {
 
         // listen for a click on the reserved1 button to do ??????????????
         //Amanda: Using this is a temporary button to get to settings currently, for testing.
-        reserved1Button.setOnClickListener(new View.OnClickListener() {
+        settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // do some stuff here
@@ -133,11 +141,26 @@ public class Timer_Screen extends AppCompatActivity {
         });
 
 
-        // listen for a click on the reserved2 button to do ??????????????
-        reserved2Button.setOnClickListener(new View.OnClickListener() {
+        // listen for a click on the schedule button
+        schedule.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // do stuff
+                // will take to schedule screen when schedule screen exists
+            }
+        });
+
+        ping.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                //send signal to watch to vibrate the watch...
+                /*
+                what we can do, is send a signal to the watch to vibrate, and have the watch
+                vibrate until button is reclicked... (much like the start->cancel->back to start functionality.
+                on ping, set a bool annoyChild = true and change the text of the button to like.."stop ping"
+                on button press again, check the bool, flip it, and send a signal back to the watch to stop vibrating
+                and reset the text on the button
+                 */
             }
         });
     }

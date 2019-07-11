@@ -40,14 +40,17 @@ public class Settings_Screen extends AppCompatActivity {
         preferences = getSharedPreferences(preferenceFile,MODE_PRIVATE);
         //PreferenceManager.getDefaultSharedPreferences(this);//getSharedPreferences(preferenceFile,MODE_PRIVATE);
 
+
+        /*
         colors = findViewById(R.id.colors);
+
         defaultColor = colors.getCheckedRadioButtonId();
-        colorButton = findViewById(R.id.colorButton);
+        colorButton = findViewById(R.id.colorButton); // gets the id of the change color button
         selectedColor = preferences.getInt("color",defaultColor);
         colorOption = findViewById(selectedColor);
-        ;//findViewById(selectedColor);
-        colorOption.setChecked(true);
 
+        colorOption.setChecked(true);
+*/
         //bluetooth menu screen
         bluetooth = findViewById(R.id.bluetooth);
         bluetooth.setOnClickListener(new View.OnClickListener() {
@@ -78,18 +81,20 @@ public class Settings_Screen extends AppCompatActivity {
 
         //color options
 
-
+/*
         colorButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //search the group for the ID of the button checked
                 selectedColor = colors.getCheckedRadioButtonId();
                 //find the button via the ID returned
+                colorOption.setChecked(false);
                 colorOption = findViewById(selectedColor);
                 colorOption.setChecked(true);
                 editor = preferences.edit();
                 editor.putInt("color", selectedColor);
                 editor.apply();
+                editor.commit();
 
                 //set the color of the watch LED's here to specified color
             }
@@ -103,7 +108,7 @@ public class Settings_Screen extends AppCompatActivity {
                 //should preserve the apps current state.
             }
         });
-
+*/
 
 
 
