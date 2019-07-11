@@ -15,6 +15,7 @@ import androidx.appcompat.widget.SwitchCompat;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import no.nordicsemi.android.blinky.R;
+import no.nordicsemi.android.blinky.ScannerActivity;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
@@ -60,7 +61,7 @@ public class Settings_Screen extends AppCompatActivity {
                 //STILL NEEDED OR INTEGRATE WITH BLINKY?
 
                 //choose the activity to go to
-                Intent intent = new Intent(getApplicationContext(),Bluetooth.class);
+                Intent intent = new Intent(getApplicationContext(), ScannerActivity.class);
                 //go to the activity
                 startActivity(intent);
 
