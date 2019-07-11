@@ -60,9 +60,9 @@ public class Settings_Screen extends AppCompatActivity {
                 //STILL NEEDED OR INTEGRATE WITH BLINKY?
 
                 //choose the activity to go to
-                //Intent intent = new Intent(getApplicationContext(),Bluetooth.class);
+                Intent intent = new Intent(getApplicationContext(),Bluetooth.class);
                 //go to the activity
-                //startActivity(intent);
+                startActivity(intent);
 
             }
         });

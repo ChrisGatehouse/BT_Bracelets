@@ -20,21 +20,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name="bt.bracelet.android.capstone.Settings_Screen">
-        </activity>
+        <activity android:name="bt.bracelet.android.capstone.Bluetooth"></activity>
+        <activity android:name="bt.bracelet.android.capstone.Settings_Screen"></activity>
         <activity android:name="bt.bracelet.android.capstone.Timer_Screen">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name="bt.bracelet.android.capstone.TimerScrollActivity"
             android:launchMode="singleTop"
-            android:noHistory="true">
-
-        </activity>
+            android:noHistory="true"></activity>
         <activity
             android:name=".SplashScreenActivity"
             android:launchMode="singleTop"
