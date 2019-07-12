@@ -15,18 +15,19 @@
 #define LED_PIN NRF_GPIO_PIN_MAP(1,11)
 
 #define NLEDS 4
-#define SPI_BUFFER_SIZE (NLEDS*3 + 1) * 4
-#define PATTERN 0x88
 
-static uint8_t colors[NLEDS*3] = {
-        255, 0, 0, 
-        0, 255, 0,
-        0, 0, 255,
-        0, 255, 255
+#define DECLARE_TX_BUFFER(name, nleds) static uint32_t name[(nleds)*3+2]
+#define DECLARE_COLOR_BUFFER(name, nleds) static uint8_t name[(nleds)*3]
+
+DECLARE_TX_BUFFER(tx_buffer, NLEDS);
+DECLARE_COLOR_BUFFER(colors, NLEDS);
+
+struct ws2812 {
+    uint8_t *colors;
+    uint32_t *tx_buffer;
+    size_t count;
+    NRF_SPIM_Type *spim;
 };
-
-static uint32_t tx_buffer[NLEDS*3+1];
-static uint32_t rx_buffer[NLEDS*3+1];
 
 uint32_t
 ws2812_spi_word(uint8_t byte)
@@ -54,53 +55,88 @@ ws2812_spi_expand_buffer(uint8_t *in, uint32_t *out, size_t length)
 {
     int i;
     for (i = 0; i < length; i++) {
-        out[i] = ws2812_spi_word(in[i]);
+        out[i+1] = ws2812_spi_word(in[i]);
     }
-    out[i] = 0x0;
+    out[i+1] = 0x0;
+    out[0] = 0x0;
+}
+
+void
+ws2812_spi_show(struct ws2812 *leds)
+{
+    ws2812_spi_expand_buffer(leds->colors, leds->tx_buffer, leds->count * 3);
+    nrf_spim_task_trigger(leds->spim, NRF_SPIM_TASK_START);
+}
+
+void
+ws2812_set_rgb(struct ws2812 *leds, int i, uint8_t r, uint8_t g, uint8_t b)
+{
+    leds->colors[i*3] = g;
+    leds->colors[i*3+1] = r;
+    leds->colors[i*3+2] = b;
+}
+
+void
+ws2812_set_int(struct ws2812 *leds, int i, uint32_t color)
+{
+    leds->colors[i*3] = (uint8_t)(color >> 8); // green
+    leds->colors[i*3+1] = (uint8_t)(color >> 16); // red
+    leds->colors[i*3+2] = (uint8_t)color; // blue
+}
+
+void
+ws2812_init(struct ws2812 *leds, 
+            int count, int pin, int aux, NRF_SPIM_Type *spim,
+            uint8_t *colors, uint32_t *tx_buffer)
+{
+    leds->count = count;
+    leds->spim = spim;
+    leds->colors = colors;
+    leds->tx_buffer = tx_buffer;
+
+    nrf_gpio_cfg_output(pin);
+    nrf_gpio_pin_clear(pin);
+    nrf_spim_configure(spim, NRF_SPIM_MODE_0, NRF_SPIM_BIT_ORDER_MSB_FIRST);
+    nrf_spim_pins_set(spim,
+                      aux,
+                      pin,
+                      NRF_SPIM_PIN_NOT_CONNECTED);
+    nrf_spim_tx_buffer_set(spim, (void *)tx_buffer, (count*3+2)*4);
+    nrf_spim_rx_buffer_set(spim, NULL, 0);
+    nrf_spim_frequency_set(spim, 0x2A000000);
+    nrf_spim_enable(spim);
 }
 
 int
 main(void)
 {
-    /*for (int i = 0; i < SPI_BUFFER_SIZE; i++) {
-        ((uint8_t *)tx_buffer)[i] = 0x88;
-    }
-    for (int i = 0; i < 12; i++) {
-        ((uint8_t *)tx_buffer)[i] = 0xCC;
-    }
-    ((uint8_t *)tx_buffer)[SPI_BUFFER_SIZE-1] = 0x00;*/
-
-    ws2812_spi_expand_buffer(colors, tx_buffer, NLEDS*3);
-
     /* Initialize SPIM. */
-    nrf_gpio_cfg_output(LED_PIN);
-    nrf_gpio_cfg_output(SPI_PIN);
-    nrf_gpio_pin_clear(SPI_PIN);
-    nrf_spim_configure(NRF_SPIM0, NRF_SPIM_MODE_0, NRF_SPIM_BIT_ORDER_MSB_FIRST);
-    nrf_spim_pins_set(NRF_SPIM0,
-                      LED_PIN,
-                      SPI_PIN,
-                      NRF_SPIM_PIN_NOT_CONNECTED);
-    nrf_spim_tx_buffer_set(NRF_SPIM0, (void *)tx_buffer, SPI_BUFFER_SIZE);
-    nrf_spim_rx_buffer_set(NRF_SPIM0, (void *)rx_buffer, SPI_BUFFER_SIZE);
-    nrf_spim_frequency_set(NRF_SPIM0, 0x2A000000);
-    nrf_spim_enable(NRF_SPIM0);
-    //nrf_spim_task_trigger(NRF_SPIM0, NRF_SPIM_TASK_START);
-
-    /*for (int i = 0; i < SPI_BUFFER_SIZE; i++) {
-        tx_buffer[i] = 0;
-    }*/
+    struct ws2812 leds;
+    ws2812_init(&leds, NLEDS, SPI_PIN, 100, NRF_SPIM0, colors, tx_buffer);
+    ws2812_set_rgb(&leds, 0, 0, 0, 0);
+    ws2812_set_rgb(&leds, 1, 0, 0, 0);
+    ws2812_set_rgb(&leds, 2, 0, 0, 0);
+    ws2812_set_rgb(&leds, 3, 0, 0, 0);
+    ws2812_spi_show(&leds);
 
     /* Toggle LEDs. */
-    //uint32_t speed = 0x20000000;
     while (true)
     {
-        //if (speed > 0x40000000) speed = 0x20000000;
 
-        nrf_delay_ms(500);
-        //nrf_spim_frequency_set(NRF_SPIM0, speed);
-        nrf_spim_task_trigger(NRF_SPIM0, NRF_SPIM_TASK_START);
-        //speed += 0x00800000;
-        //nrf_gpio_pin_toggle(LED_PIN);
+        nrf_delay_ms(1000);
+        ws2812_set_rgb(&leds, 0, 255, 64, 200);
+        ws2812_spi_show(&leds);
+
+        nrf_delay_ms(1000);
+        ws2812_set_rgb(&leds, 1, 0, 200, 200);
+        ws2812_spi_show(&leds);
+
+        nrf_delay_ms(1000);
+        ws2812_set_rgb(&leds, 2, 32, 32, 16);
+        ws2812_spi_show(&leds);
+
+        nrf_delay_ms(1000);
+        ws2812_set_rgb(&leds, 3, 0, 200, 0);
+        ws2812_spi_show(&leds);
     }
 }
