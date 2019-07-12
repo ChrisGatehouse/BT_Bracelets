@@ -145,7 +145,8 @@ public class Timer_Screen extends AppCompatActivity {
         schedule.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // will take to schedule screen when schedule screen exists
+                Intent intent = new Intent(getApplicationContext(), Schedule_Screen.class);
+                startActivity(intent);
             }
         });
 

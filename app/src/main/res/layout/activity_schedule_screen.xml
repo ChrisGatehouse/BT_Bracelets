@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="bt.bracelet.android.capstone.Schedule_Screen">
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/reservedForSettingButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        app:srcCompat="@drawable/ic_settings"
+        />
+    <NumberPicker
+        android:id="@+id/schedMins"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        />
+    <NumberPicker
+        android:id="@+id/schedHours"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@+id/schedMins"
+        />
+    <RadioGroup
+        android:id="@+id/ampmReserve"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/schedMins"
+        android:layout_centerVertical="true"
+        android:checkedButton="@id/am">
+
+        <RadioButton
+            android:id="@+id/am"
+            android:layout_width="wrap_content"
+            android:layout_height="31dp"
+            android:textSize="12dp"
+            tools:text="AM" />
+
+        <RadioButton
+            android:id="@+id/pm"
+            android:layout_width="wrap_content"
+            android:layout_height="33dp"
+            android:textSize="12dp"
+            tools:text="PM" />
+    </RadioGroup>
+
+    <ToggleButton
+        android:id="@+id/remindOkButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/reservedForDaySelect"
+        android:layout_centerHorizontal="true"
+        android:layout_marginVertical="@dimen/activity_horizontal_margin"
+        android:textOff="Set Reminder"
+        android:textOn="Cancel Reminder"/>
+
+    <TextView
+        android:id="@+id/reservedForDaySelect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/schedMins"
+        android:layout_centerHorizontal="true"
+        android:layout_marginVertical="@dimen/activity_vertical_margin"
+        android:text="TextView"
+        tools:text="M T W Th F S Su" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/TimerButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Timer" />
+
+        <Button
+            android:id="@+id/PingButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Ping" />
+
+    </LinearLayout>
+</RelativeLayout>
