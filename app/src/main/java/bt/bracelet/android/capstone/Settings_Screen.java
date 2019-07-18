@@ -137,8 +137,8 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
             //Build and show the new color
             ShowColor.setBackgroundColor(Color.argb(A,red,G,B));
             //show the color value
-            ShowColor.setText("0x"+String.format("%02x", A)+String.format("%02x", red)
-                    +String.format("%02x", G)+String.format("%02x", B));
+            //ShowColor.setText("0x"+String.format("%02x", A)+String.format("%02x", red)
+            //        +String.format("%02x", G)+String.format("%02x", B));
             //some math so text shows (needs improvement for greys)
             ShowColor.setTextColor(Color.argb(0xff,255-red,255-G,255-B));
         };

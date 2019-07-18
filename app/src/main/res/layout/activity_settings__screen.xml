@@ -110,7 +110,6 @@
             android:layout_margin="24dp"
             android:background="@android:color/white"
             android:padding="24dp"
-            android:text="0xffffffff"
             android:textAlignment="center"
             android:textColor="@android:color/black"
             android:textSize="36dp" />
