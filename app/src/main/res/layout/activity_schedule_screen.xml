@@ -15,7 +15,7 @@
         android:layout_alignParentRight="true"
         app:srcCompat="@drawable/ic_settings"
         />
-    <NumberPicker
+    <!--<NumberPicker
         android:id="@+id/schedMins"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -51,7 +51,15 @@
             android:text="@string/clock_pm"
             android:textSize="12sp"
             tools:text="@string/clock_pm" />
-    </RadioGroup>
+    </RadioGroup> -->
+    <TimePicker
+        android:id="@+id/TimePicker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:timePickerMode="spinner"/>
+
 
     <ToggleButton
         android:id="@+id/remindOkButton"
@@ -67,7 +75,7 @@
         android:id="@+id/daySelect"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/schedMins"
+        android:layout_below="@id/TimePicker"
         android:layout_centerHorizontal="true"
         android:layout_marginVertical="@dimen/activity_vertical_margin"
         android:orientation="horizontal">

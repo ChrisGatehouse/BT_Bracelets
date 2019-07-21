@@ -1,12 +1,12 @@
 package bt.bracelet.android.capstone;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.NumberPicker;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TimePicker;
 import android.widget.ToggleButton;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -24,10 +24,10 @@ public class Schedule_Screen extends AppCompatActivity {
     private ToggleButton day6Button;
     private Button timerButton;
     private Button pingButton;
-    private NumberPicker hours;
-    private NumberPicker minutes;
-    private RadioGroup ampmSelect;
-    private boolean isAM;
+    private TimePicker time;
+    private int hour;
+    private int minute;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +36,7 @@ public class Schedule_Screen extends AppCompatActivity {
 
         settingButton = findViewById(R.id.reservedForSettingButton);
         remindOkButton = findViewById(R.id.remindOkButton);
+        pingButton = findViewById(R.id.PingButton);
         day0Button = findViewById(R.id.day0);
         day1Button = findViewById(R.id.day1);
         day2Button = findViewById(R.id.day2);
@@ -44,21 +45,18 @@ public class Schedule_Screen extends AppCompatActivity {
         day5Button = findViewById(R.id.day5);
         day6Button = findViewById(R.id.day6);
         timerButton = findViewById(R.id.TimerButton);
-        pingButton = findViewById(R.id.PingButton);
-        hours = findViewById(R.id.schedHours);
-        minutes = findViewById(R.id.schedMins);
-        ampmSelect = findViewById(R.id.ampmReserve);
+        time = findViewById(R.id.TimePicker);
 
-        // Set isAM
-        isAM = R.id.am == ampmSelect.getCheckedRadioButtonId();
+        /*TODO: AM/PM vs 24hr view
 
-        // Set picker parameters
-        hours.setMaxValue(12);
-        hours.setMinValue(0);
-        hours.setValue(0);
-        minutes.setMaxValue(59);
-        minutes.setMinValue(0);
-        minutes.setValue(0);
+        * When Ian is done working on settings, we can add a toggle button to allow the user to choose
+        * between 24hour and 12hr views. it'll need to:
+        * Update preference file on toggle
+        * Read shared preference file
+        * set the view like below.*/
+        //currently just setting to AM/PM
+        time.setIs24HourView(false);
+
 
         // Static array of booleans to track what days are selected
         boolean[] daysSelected = new boolean[7];
@@ -85,8 +83,11 @@ public class Schedule_Screen extends AppCompatActivity {
                 // Steps:
                 //      0: Determine state of button, if cancel, cancel. else:
                 //      1: Get time from selectors
+                hour = time.getHour();
+                minute = time.getMinute();
                 //      2: Get days selected
                 //      3: Schedule (use alarms [https://developer.android.com/training/scheduling/alarms]?)
+                //      YES. it works outside the app, so it seems we wont need to save settings if we choose this :D
                 if (remindOkButton.isChecked()) {
 
                 }
@@ -165,11 +166,5 @@ public class Schedule_Screen extends AppCompatActivity {
             }
         });
 
-        ampmSelect.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                // TODO: will be removed when changed to timepicker
-            }
-        });
     }
 }
