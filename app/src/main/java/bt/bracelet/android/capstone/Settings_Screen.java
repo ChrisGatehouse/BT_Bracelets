@@ -17,10 +17,16 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import no.nordicsemi.android.blinky.R;
 import no.nordicsemi.android.blinky.ScannerActivity;
 
+// adding for color sliders
+import android.graphics.Color;
+import android.widget.SeekBar;
+import android.widget.TextView;
+
+
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 
-public class Settings_Screen extends AppCompatActivity {
+public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener {
 
     private Button bluetooth;//button that takes user to bluetooth page
     private SwitchCompat switch_2; //currently unused
@@ -33,14 +39,39 @@ public class Settings_Screen extends AppCompatActivity {
     private int selectedColor;
     private int defaultColor;
     private static final String preferenceFile = "bt.bracelet.android.capstone";
+    // added for color sliders
+    //Reference the seek bars
+    SeekBar SeekA;
+    SeekBar SeekR;
+    SeekBar SeekG;
+    SeekBar SeekB;
+    int opacity = 0;
+    int red = 0;
+    int green = 0;
+    int blue = 0;
+    //Reference the TextView
+    TextView ShowColor;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings__screen);
-        preferences = getSharedPreferences(preferenceFile,MODE_PRIVATE);
+        preferences = getSharedPreferences(preferenceFile, MODE_PRIVATE);
         //PreferenceManager.getDefaultSharedPreferences(this);//getSharedPreferences(preferenceFile,MODE_PRIVATE);
 
+        //Get a reference to the seekbars
+        SeekA = findViewById(R.id.seekA);
+        SeekR = findViewById(R.id.seekR);
+        SeekG = findViewById(R.id.seekG);
+        SeekB = findViewById(R.id.seekB);
+        //Reference the TextView
+        ShowColor = findViewById(R.id.textView);
+        //This activity implements SeekBar OnSeekBarChangeListener
+        SeekA.setOnSeekBarChangeListener(this);
+        SeekR.setOnSeekBarChangeListener(this);
+        SeekG.setOnSeekBarChangeListener(this);
+        SeekB.setOnSeekBarChangeListener(this);
 
         /*
         colors = findViewById(R.id.colors);
@@ -51,6 +82,8 @@ public class Settings_Screen extends AppCompatActivity {
         colorOption = findViewById(selectedColor);
 
         colorOption.setChecked(true);
+
+
 */
         //bluetooth menu screen
         bluetooth = findViewById(R.id.bluetooth);
@@ -79,8 +112,43 @@ public class Settings_Screen extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
 
-        //color options
+        // added for color wheel
+        //Satisfy the implements
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromTouch) {
+
+            //get current ARGB values
+            int A=SeekA.getProgress();
+            int red=SeekR.getProgress();
+            int G=SeekG.getProgress();
+            int B=SeekB.getProgress();
+            //Reference the value changing
+            int id=seekBar.getId();
+            //Get the chnaged value
+            if(id == R.id.seekA)
+                A=progress;
+            else if(id == R.id.seekR)
+                red=progress;
+            else if(id == R.id.seekA)
+                G=progress;
+            else if(id == R.id.seekA)
+                B=progress;
+            //Build and show the new color
+            ShowColor.setBackgroundColor(Color.argb(A,red,G,B));
+            //show the color value
+            //ShowColor.setText("0x"+String.format("%02x", A)+String.format("%02x", red)
+            //        +String.format("%02x", G)+String.format("%02x", B));
+            //some math so text shows (needs improvement for greys)
+            ShowColor.setTextColor(Color.argb(0xff,255-red,255-G,255-B));
+        };
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            //Only required due to implements
+        };
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            //Only required due to implements
+        }
+
 
 /*
         colorButton.setOnClickListener(new View.OnClickListener() {
@@ -111,8 +179,5 @@ public class Settings_Screen extends AppCompatActivity {
         });
 */
 
-
-
-    }
 }
 

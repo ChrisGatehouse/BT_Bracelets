@@ -10,13 +10,113 @@
     android:orientation="vertical"
     tools:context="bt.bracelet.android.capstone.Settings_Screen">
 
-
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:text="Bluetooth Options"
         android:id="@+id/bluetooth"
         />
+
+    // added for color wheel
+
+    <TextView
+        android:id="@+id/labelA"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="A"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_centerVertical="true"/>
+
+    <SeekBar
+        android:id="@+id/seekA"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/labelA"
+        android:max="255"
+        android:progress="255" />
+
+    <TextView
+        android:id="@+id/labelR"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/labelA"
+        android:text="R"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <SeekBar
+        android:id="@+id/seekR"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/seekA"
+        android:layout_toRightOf="@id/labelR"
+        android:layout_centerVertical="true"
+        android:layout_alignBottom="@id/labelR"
+        android:max="255"
+        android:progress="255" />
+    <TextView
+        android:id="@+id/labelG"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/labelR"
+        android:text="G"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <SeekBar
+        android:id="@+id/seekG"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/seekR"
+        android:layout_alignBottom="@id/labelG"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/labelG"
+        android:layout_toRightOf="@+id/labelG"
+        android:max="255"
+        android:progress="255" />
+    <TextView
+        android:id="@+id/labelB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/labelG"
+        android:text="B"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <SeekBar
+        android:id="@+id/seekB"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/seekG"
+        android:layout_alignBottom="@id/labelB"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/labelB"
+        android:max="255"
+        android:progress="255" />
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_below="@+id/labelB"
+        android:background="@android:color/darker_gray"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/labelB"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="24dp"
+            android:background="@android:color/white"
+            android:padding="24dp"
+            android:textAlignment="center"
+            android:textColor="@android:color/black"
+            android:textSize="36dp" />
+    </LinearLayout>
+
+
+    // added for color wheel
     <!-- <android.support.v7.widget.SwitchCompat
          android:id="@+id/bluetooth_switch"
          android:layout_width="match_parent"
@@ -37,6 +137,9 @@
          />
  -->
 
+    // added for color wheel
+
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/back_button"
         android:layout_width="match_parent"
@@ -44,6 +147,8 @@
         android:layout_alignParentBottom="true"
         app:srcCompat="@drawable/ic_arrow_back" />
 
+
+    <!-- commenting out, blocks view of color changer
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -52,6 +157,7 @@
         android:layout_below="@id/bluetooth"
         android:id="@+id/colorText"
         android:text="Change Watch Color"/>
+        -->
 <!--
     <RadioGroup
         android:layout_width="wrap_content"
