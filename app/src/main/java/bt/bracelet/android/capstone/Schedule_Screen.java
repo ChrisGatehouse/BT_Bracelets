@@ -60,6 +60,12 @@ public class Schedule_Screen extends AppCompatActivity {
         minutes.setMinValue(0);
         minutes.setValue(0);
 
+        // Static array of booleans to track what days are selected
+        boolean[] daysSelected = new boolean[7];
+        for (int i = 0; i < 7; i++){
+            daysSelected[i] = false;
+        }
+
         // OnClick listeners
 
         //    From Timer_Screen
@@ -76,10 +82,65 @@ public class Schedule_Screen extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // TODO: add functionality after scheduling is figured out
+                // Steps:
+                //      0: Determine state of button, if cancel, cancel. else:
+                //      1: Get time from selectors
+                //      2: Get days selected
+                //      3: Schedule (use alarms [https://developer.android.com/training/scheduling/alarms]?)
+                if (remindOkButton.isChecked()) {
+
+                }
             }
         });
 
+        day0Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                daysSelected[0] = day0Button.isChecked();
+            }
+        });
 
+        day1Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                daysSelected[1] = day1Button.isChecked();
+            }
+        });
+
+        day2Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                daysSelected[2] = day2Button.isChecked();
+            }
+        });
+
+        day3Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                daysSelected[3] = day3Button.isChecked();
+            }
+        });
+
+        day4Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                daysSelected[4] = day4Button.isChecked();
+            }
+        });
+
+        day5Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                daysSelected[5] = day5Button.isChecked();
+            }
+        });
+
+        day6Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                daysSelected[6] = day6Button.isChecked();
+            }
+        });
 
         timerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,7 +168,7 @@ public class Schedule_Screen extends AppCompatActivity {
         ampmSelect.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                // TODO: change AM/PM selection logic based on new selection
+                // TODO: will be removed when changed to timepicker
             }
         });
     }
