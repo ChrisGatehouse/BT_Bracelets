@@ -56,4 +56,10 @@
 	<style name="AppTheme.SplashScreen">
 		<item name="colorPrimaryDark">@android:color/transparent</item>
 	</style>
+
+	<!-- Below are the modifications made to the original file above by the Capstone B team -->
+	<style name="body">
+		<item name="android:textSize">14sp</item>
+		<item name="android:textColor">@color/white</item>
+	</style>
 </resources>

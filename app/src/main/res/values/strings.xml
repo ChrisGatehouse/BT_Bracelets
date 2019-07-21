@@ -70,4 +70,20 @@
     <string name="state_discovering_services">Discovering services…</string>
     <string name="state_initializing">Initializing…</string>
     <string name="state_disconnected">Device disconnected.</string>
+
+    <!-- Below are the modifications made to the original file above by the Capstone B team -->
+    <string name="clock_am">AM</string>
+    <string name="clock_pm">PM</string>
+    <string name="remind_ok">Set Reminder</string>
+    <string name="remind_can">Cancel Reminder</string>
+    <string name="time_button">Timer</string>
+    <string name="ping_button">Ping</string>
+    <string name="sched_button">Schedule</string>
+    <string name="day_0">Su</string>
+    <string name="day_1">M</string>
+    <string name="day_2">Tu</string>
+    <string name="day_3">W</string>
+    <string name="day_4">Th</string>
+    <string name="day_5">F</string>
+    <string name="day_6">Sa</string>
 </resources>

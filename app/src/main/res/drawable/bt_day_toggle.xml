@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true">
+        <bitmap
+            android:src="@drawable/bt_day_selected"
+            android:gravity="center" />
+        <color android:color="@color/colorPrimaryDark"/>
+    </item>
+    <item>
+        <bitmap
+            android:src="@drawable/bt_day_default"
+            android:gravity="center" />
+        <color android:color="@color/colorPrimary"/>
+    </item>
+</selector>

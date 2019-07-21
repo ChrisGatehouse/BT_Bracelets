@@ -15,6 +15,13 @@ import no.nordicsemi.android.blinky.R;
 public class Schedule_Screen extends AppCompatActivity {
     private FloatingActionButton settingButton;
     private ToggleButton remindOkButton;
+    private ToggleButton day0Button;
+    private ToggleButton day1Button;
+    private ToggleButton day2Button;
+    private ToggleButton day3Button;
+    private ToggleButton day4Button;
+    private ToggleButton day5Button;
+    private ToggleButton day6Button;
     private Button timerButton;
     private Button pingButton;
     private NumberPicker hours;
@@ -29,6 +36,13 @@ public class Schedule_Screen extends AppCompatActivity {
 
         settingButton = findViewById(R.id.reservedForSettingButton);
         remindOkButton = findViewById(R.id.remindOkButton);
+        day0Button = findViewById(R.id.day0);
+        day1Button = findViewById(R.id.day1);
+        day2Button = findViewById(R.id.day2);
+        day3Button = findViewById(R.id.day3);
+        day4Button = findViewById(R.id.day4);
+        day5Button = findViewById(R.id.day5);
+        day6Button = findViewById(R.id.day6);
         timerButton = findViewById(R.id.TimerButton);
         pingButton = findViewById(R.id.PingButton);
         hours = findViewById(R.id.schedHours);
@@ -64,6 +78,8 @@ public class Schedule_Screen extends AppCompatActivity {
                 // TODO: add functionality after scheduling is figured out
             }
         });
+
+
 
         timerButton.setOnClickListener(new View.OnClickListener() {
             @Override

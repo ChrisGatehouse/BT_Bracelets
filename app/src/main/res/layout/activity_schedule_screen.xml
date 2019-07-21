@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorBackground"
     tools:context="bt.bracelet.android.capstone.Schedule_Screen">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -39,38 +40,134 @@
             android:id="@+id/am"
             android:layout_width="wrap_content"
             android:layout_height="31dp"
-            android:textSize="12dp"
-            tools:text="AM" />
+            android:text="@string/clock_am"
+            android:textSize="12sp"
+            tools:text="@string/clock_am" />
 
         <RadioButton
             android:id="@+id/pm"
             android:layout_width="wrap_content"
             android:layout_height="33dp"
-            android:textSize="12dp"
-            tools:text="PM" />
+            android:text="@string/clock_pm"
+            android:textSize="12sp"
+            tools:text="@string/clock_pm" />
     </RadioGroup>
 
     <ToggleButton
         android:id="@+id/remindOkButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/reservedForDaySelect"
         android:layout_centerHorizontal="true"
+        android:layout_below="@id/daySelect"
         android:layout_marginVertical="@dimen/activity_horizontal_margin"
-        android:textOff="Set Reminder"
-        android:textOn="Cancel Reminder"/>
+        android:textOff="@string/remind_ok"
+        android:textOn="@string/remind_can" />
 
-    <TextView
-        android:id="@+id/reservedForDaySelect"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/daySelect"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/schedMins"
         android:layout_centerHorizontal="true"
         android:layout_marginVertical="@dimen/activity_vertical_margin"
-        android:text="TextView"
-        tools:text="M T W Th F S Su" />
+        android:orientation="horizontal">
+
+        <ToggleButton
+            android:id="@+id/day0"
+            style="@style/body"
+            android:layout_width="0px"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="@drawable/bt_day_toggle"
+            android:padding="0dp"
+            android:singleLine="true"
+            android:textOn="@string/day_0"
+            android:textColor="@color/text_color"
+            android:textOff="@string/day_0" />
+
+        <ToggleButton
+            android:id="@+id/day1"
+            style="@style/body"
+            android:layout_width="0px"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="@drawable/bt_day_toggle"
+            android:padding="0dp"
+            android:singleLine="true"
+            android:textOn="@string/day_1"
+            android:textColor="@color/text_color"
+            android:textOff="@string/day_1" />
+
+        <ToggleButton
+            android:id="@+id/day2"
+            style="@style/body"
+            android:layout_width="0px"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="@drawable/bt_day_toggle"
+            android:padding="0dp"
+            android:singleLine="true"
+            android:textOn="@string/day_2"
+            android:textColor="@color/text_color"
+            android:textOff="@string/day_2" />
+
+        <ToggleButton
+            android:id="@+id/day3"
+            style="@style/body"
+            android:layout_width="0px"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="@drawable/bt_day_toggle"
+            android:padding="0dp"
+            android:singleLine="true"
+            android:textOn="@string/day_3"
+            android:textColor="@color/text_color"
+            android:textOff="@string/day_3" />
+
+        <ToggleButton
+            android:id="@+id/day4"
+            style="@style/body"
+            android:layout_width="0px"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="@drawable/bt_day_toggle"
+            android:padding="0dp"
+            android:singleLine="true"
+            android:textOn="@string/day_4"
+            android:textColor="@color/text_color"
+            android:textOff="@string/day_4" />
+
+        <ToggleButton
+            android:id="@+id/day5"
+            style="@style/body"
+            android:layout_width="0px"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="@drawable/bt_day_toggle"
+            android:padding="0dp"
+            android:singleLine="true"
+            android:textOn="@string/day_5"
+            android:textColor="@color/text_color"
+            android:textOff="@string/day_5" />
+
+        <ToggleButton
+            android:id="@+id/day6"
+            style="@style/body"
+            android:layout_width="0px"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="@drawable/bt_day_toggle"
+            android:padding="0dp"
+            android:singleLine="true"
+            android:textOn="@string/day_6"
+            android:textColor="@color/text_color"
+            android:textOff="@string/day_6" />
+
+    </LinearLayout>
+
 
     <LinearLayout
+        android:id="@+id/footerButtons"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="bottom"
@@ -81,14 +178,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Timer" />
+            android:text="@string/time_button" />
 
         <Button
             android:id="@+id/PingButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Ping" />
+            android:text="@string/ping_button" />
 
     </LinearLayout>
 </RelativeLayout>

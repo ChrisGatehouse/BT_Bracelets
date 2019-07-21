@@ -23,10 +23,10 @@
 
 <resources>
 	<!-- Base theme colors -->
-	<color name="colorPrimary">@color/nordicBlue</color>
-	<color name="colorPrimaryDark">@color/nordicBlueDark</color>
+	<color name="colorPrimary">@color/default_blue</color>
+	<color name="colorPrimaryDark">@color/alt_blue</color>
 	<color name="colorAccent">@color/nordicLake</color>
-	<color name="colorBackground">@color/lightGray</color>
+	<color name="colorBackground">@color/background</color>
 	<color name="colorSignalStrength">@color/nordicDarkGray</color>
 	<color name="colorDeviceIcon">@color/nordicBlue</color>
 
@@ -58,4 +58,10 @@
 	<color name="white">#FFFFFFFF</color>
 	<color name="black">#FF000000</color>
 	<color name="lightGray">#FFF5F5F5</color>
+
+	<!-- Capstone Color Scheme -->
+	<color name="background">#F3EFE0</color>
+	<color name="text_color">#9A3334</color>
+	<color name="default_blue">#3399FF</color>
+	<color name="alt_blue">#217C7E</color>
 </resources>
