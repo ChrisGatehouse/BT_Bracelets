@@ -1,5 +1,7 @@
 package bt.bracelet.android.capstone;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -10,6 +12,10 @@ import android.widget.TimePicker;
 import android.widget.ToggleButton;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
 import no.nordicsemi.android.blinky.R;
 
 public class Schedule_Screen extends AppCompatActivity {
@@ -27,13 +33,30 @@ public class Schedule_Screen extends AppCompatActivity {
     private TimePicker time;
     private int hour;
     private int minute;
+    private Calendar alarmCal;
+    private AlarmManager alarmMgr;
+    private PendingIntent[] alarmIntentArr;
 
+    // Method to set alarm
+    private void setAlarm(int dayOfWeek) {
+        // Set the alarm to the alarmCal, per the docs
+        alarmCal.setTimeInMillis(System.currentTimeMillis());
+        alarmCal.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+        alarmCal.set(Calendar.HOUR_OF_DAY, hour);
+        alarmCal.set(Calendar.MINUTE, minute);
+
+        // Set the alarm in the alarm manager, weekly. Each alarmIntentArr index is a day [0,6], dayOfWeek is [1,7]
+        // Repeat weekly, until canceled.
+        alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, alarmCal.getTimeInMillis(),
+                7 * AlarmManager.INTERVAL_DAY, alarmIntentArr[dayOfWeek - 1]);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_schedule_screen);
 
+        // Initialize variables
         settingButton = findViewById(R.id.reservedForSettingButton);
         remindOkButton = findViewById(R.id.remindOkButton);
         pingButton = findViewById(R.id.PingButton);
@@ -46,6 +69,15 @@ public class Schedule_Screen extends AppCompatActivity {
         day6Button = findViewById(R.id.day6);
         timerButton = findViewById(R.id.TimerButton);
         time = findViewById(R.id.TimePicker);
+        hour = minute = 0;
+        alarmCal = Calendar.getInstance();
+        alarmMgr =  (AlarmManager) getApplicationContext().getSystemService(ALARM_SERVICE);
+        // Intent for the alarm receiver, needed for the alarmIntentArr
+        Intent alarmRecIntent = new Intent(getApplicationContext(), AlarmReceiver.class);
+        for (int i = 0; i < 7; i++){
+            // Set the alarmIntentArr elements with requestCode [0,6] for each corresponding day. NEEDS TO BE UNIQUE
+            alarmIntentArr[i] = PendingIntent.getBroadcast(getApplicationContext(), i, alarmRecIntent, 0);
+        }
 
         /*TODO: AM/PM vs 24hr view
 
@@ -82,14 +114,28 @@ public class Schedule_Screen extends AppCompatActivity {
                 // TODO: add functionality after scheduling is figured out
                 // Steps:
                 //      0: Determine state of button, if cancel, cancel. else:
-                //      1: Get time from selectors
-                hour = time.getHour();
-                minute = time.getMinute();
-                //      2: Get days selected
-                //      3: Schedule (use alarms [https://developer.android.com/training/scheduling/alarms]?)
-                //      YES. it works outside the app, so it seems we wont need to save settings if we choose this :D
                 if (remindOkButton.isChecked()) {
-
+                    //      1: Get time from selectors
+                    hour = time.getHour();
+                    minute = time.getMinute();
+                    //      2: Get days selected
+                    // Can be done by iterating through the array
+                    for (int dayIndex = 0; dayIndex < 7; dayIndex++){
+                        if (daysSelected[dayIndex]){
+                            //      3: Schedule (use alarms [https://developer.android.com/training/scheduling/alarms]?)
+                            //      YES. it works outside the app, so it seems we wont need to save settings if we choose this :D
+                            // dayIndex is [0,6], Calendar expects days (Su-Sa) to be [1,7]. So add one to the argument.
+                            setAlarm(dayIndex + 1);
+                        }
+                    }
+                }
+                else {
+                    // Cancel the alarms
+                    if (alarmMgr != null){
+                        for (int alarmDayIndex = 0; alarmDayIndex < 7; alarmDayIndex++) {
+                            alarmMgr.cancel(alarmIntentArr[alarmDayIndex]);
+                        }
+                    }
                 }
             }
         });

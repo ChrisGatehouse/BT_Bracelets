@@ -60,5 +60,10 @@
             android:name=".BlinkyActivity"
             android:launchMode="singleTop"
             android:parentActivityName=".ScannerActivity" />
+        <receiver android:name="bt.bracelet.android.capstone.AlarmReceiver">
+            <intent-filter>
+                <action android:name="com.bt.bracelet.android.capstone"/>
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>
