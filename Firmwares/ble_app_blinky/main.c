@@ -63,18 +63,21 @@
 #include "nrf_ble_gatt.h"
 #include "nrf_ble_qwr.h"
 #include "nrf_pwr_mgmt.h"
+#include "nrf_delay.h"
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
+#include "bsp.h"
 
 
 #define ADVERTISING_LED                 BSP_BOARD_LED_0                         /**< Is on when device is advertising. */
 #define CONNECTED_LED                   BSP_BOARD_LED_1                         /**< Is on when device has connected. */
 #define LEDBUTTON_LED                   BSP_BOARD_LED_2                         /**< LED to be toggled with the help of the LED Button Service. */
 #define LEDBUTTON_BUTTON                BSP_BUTTON_0                            /**< Button that will trigger the notification event with the LED Button Service */
+#define ADVERTISING_BUTTON              BSP_BUTTON_1
 
-#define DEVICE_NAME                     "Nordic_Blinky"                         /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                     "BT on yo wrist"                         /**< Name of device. Will be included in the advertising data. */
 
 #define APP_BLE_OBSERVER_PRIO           3                                       /**< Application's BLE observer priority. You shouldn't need to modify this value. */
 #define APP_BLE_CONN_CFG_TAG            1                                       /**< A tag identifying the SoftDevice BLE configuration. */
@@ -100,6 +103,10 @@
 #define MAIN_LED                        NRF_GPIO_PIN_MAP(1,10)                  // Connected to P1.10 BLUE
 #define SECOND_LED                      NRF_GPIO_PIN_MAP(1,11)                  // Connected to P1.11 BLUE
 #define THIRD_LED                       NRF_GPIO_PIN_MAP(1,12)                  // Connected to P1.12
+//#define ADVERTISING_BUTTON              2                                       // Button to start advertising
+
+volatile int advertise_start_flag = 0;
+
 
 BLE_LBS_DEF(m_lbs);                                                             /**< LED Button Service instance. */
 NRF_BLE_GATT_DEF(m_gatt);                                                       /**< GATT module instance. */
@@ -126,6 +133,7 @@ static ble_gap_adv_data_t m_adv_data =
 
     }
 };
+
 
 /**@brief Function for assert macro callback.
  *
@@ -291,6 +299,20 @@ static void led_write_handler(uint16_t conn_handle, ble_lbs_t * p_lbs, uint8_t l
 }
 
 
+void blinksomelights()
+{
+      
+      bsp_board_led_on(LEDBUTTON_LED);
+      nrf_gpio_pin_write(MAIN_LED, 0);
+      nrf_gpio_pin_write(SECOND_LED, 0);
+      nrf_delay_ms(1000);
+      bsp_board_led_off(LEDBUTTON_LED);
+      nrf_gpio_pin_write(MAIN_LED, 1);
+      nrf_gpio_pin_write(SECOND_LED, 1);
+}
+
+
+
 /**@brief Function for initializing services that will be used by the application.
  */
 static void services_init(void)
@@ -333,6 +355,13 @@ static void on_conn_params_evt(ble_conn_params_evt_t * p_evt)
         err_code = sd_ble_gap_disconnect(m_conn_handle, BLE_HCI_CONN_INTERVAL_UNACCEPTABLE);
         APP_ERROR_CHECK(err_code);
     }
+}
+
+static void disconnect()
+{
+    ret_code_t err_code;
+    err_code = sd_ble_gap_disconnect(m_conn_handle, BLE_HCI_CONN_INTERVAL_UNACCEPTABLE);
+    APP_ERROR_CHECK(err_code);
 }
 
 
@@ -401,17 +430,17 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
             m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
             err_code = nrf_ble_qwr_conn_handle_assign(&m_qwr, m_conn_handle);
             APP_ERROR_CHECK(err_code);
-            err_code = app_button_enable();
-            APP_ERROR_CHECK(err_code);
+            //err_code = app_button_enable();
+            //APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_GAP_EVT_DISCONNECTED:
             NRF_LOG_INFO("Disconnected");
             bsp_board_led_off(CONNECTED_LED);
             m_conn_handle = BLE_CONN_HANDLE_INVALID;
-            err_code = app_button_disable();
-            APP_ERROR_CHECK(err_code);
-            advertising_start();
+            //err_code = app_button_disable();
+            //APP_ERROR_CHECK(err_code);
+            //advertising_start();
             break;
 
         case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
@@ -502,23 +531,68 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
     switch (pin_no)
     {
         case LEDBUTTON_BUTTON:
+          
             NRF_LOG_INFO("Send button state change.");
+            //advertising_start();
+            //advertise_start_flag = 1;
+            //disconnect();
             err_code = ble_lbs_on_button_change(m_conn_handle, &m_lbs, button_action);
             if (err_code != NRF_SUCCESS &&
                 err_code != BLE_ERROR_INVALID_CONN_HANDLE &&
                 err_code != NRF_ERROR_INVALID_STATE &&
                 err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING)
             {
+                //advertising_start();
+                //disconnect();
                 APP_ERROR_CHECK(err_code);
             }
-            break;
 
+            break;
+        case ADVERTISING_BUTTON:
+            if (button_action == BSP_BUTTON_ACTION_RELEASE)
+            {
+              advertising_start();
+            }
+            break;
         default:
+            //advertising_start();
             APP_ERROR_HANDLER(pin_no);
             break;
     }
 }
 
+
+/**@brief Function for handling events from the BSP module.
+ *
+ * @param[in]   event   Event generated when button is pressed.
+ */
+ /*
+static void bsp_event_handler(bsp_event_t event)
+{
+    SEGGER_RTT_printf(0, "bsp_event_handler function");
+    switch (event)
+    {
+        case BSP_EVENT_SLEEP:
+            sleep_mode_enter();
+            break; // BSP_EVENT_SLEEP
+
+        case BSP_EVENT_KEY_0:
+        	SEGGER_RTT_printf(0, "Button 1 is pressed!\n");
+        	blecomm();
+                advertising_start();
+            break;
+        case BSP_EVENT_KEY_1:
+        	SEGGER_RTT_printf(0, "Button 2 is pressed!\n");
+                advertising_start();
+        	break;
+        case BSP_EVENT_ADVERTISING_START:
+          advertising_start();					
+          break;
+        default:
+            break;
+    }
+}
+*/
 
 /**@brief Function for initializing the button handler module.
  */
@@ -527,14 +601,19 @@ static void buttons_init(void)
     ret_code_t err_code;
 
     //The array must be static because a pointer to it will be saved in the button handler module.
+    
     static app_button_cfg_t buttons[] =
     {
-        {LEDBUTTON_BUTTON, false, BUTTON_PULL, button_event_handler}
+        {LEDBUTTON_BUTTON, false, BUTTON_PULL, button_event_handler},
+        {ADVERTISING_BUTTON, false, BUTTON_PULL, button_event_handler}
     };
 
     err_code = app_button_init(buttons, ARRAY_SIZE(buttons),
                                BUTTON_DETECTION_DELAY);
-    APP_ERROR_CHECK(err_code);
+
+    // err_code = bsp_event_to_button_action_assign(ADVERTISING_BUTTON, BSP_BUTTON_ACTION_LONG_PUSH, BSP_EVENT_ADVERTISING_START);
+     APP_ERROR_CHECK(err_code);
+ 
 }
 
 
@@ -563,10 +642,12 @@ static void power_management_init(void)
  */
 static void idle_state_handle(void)
 {
+
     if (NRF_LOG_PROCESS() == false)
     {
         nrf_pwr_mgmt_run();
     }
+
 }
 
 
@@ -598,14 +679,23 @@ int main(void)
     services_init();
     advertising_init();
     conn_params_init();
-
+    app_button_enable();
+    
     // Start execution.
     NRF_LOG_INFO("Blinky example started.");
-    advertising_start();
+   // advertising_start();
 
     // Enter main loop.
     for (;;)
     {
+        /*
+        if (advertise_start_flag)
+        {
+          advertise_start_flag = 0;
+          advertising_start();
+          blinksomelights();
+        }
+        */
         idle_state_handle();
     }
 }
