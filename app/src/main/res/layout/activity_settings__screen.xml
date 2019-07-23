@@ -18,7 +18,13 @@
         android:id="@+id/bluetooth"
         />
 
-    // added for color wheel
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/linearLayout"
+        android:text="Send Color Choice To Watch"
+        android:id="@+id/confirm_color"
+        />
 
     <!--
     <TextView
