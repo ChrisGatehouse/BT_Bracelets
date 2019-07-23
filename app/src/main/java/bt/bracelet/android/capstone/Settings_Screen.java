@@ -41,14 +41,10 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
     private static final String preferenceFile = "bt.bracelet.android.capstone";
     // added for color sliders
     //Reference the seek bars
-    SeekBar SeekA;
+    //SeekBar SeekA;
     SeekBar SeekR;
     SeekBar SeekG;
     SeekBar SeekB;
-    int opacity = 0;
-    int red = 0;
-    int green = 0;
-    int blue = 0;
     //Reference the TextView
     TextView ShowColor;
 
@@ -61,14 +57,14 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
         //PreferenceManager.getDefaultSharedPreferences(this);//getSharedPreferences(preferenceFile,MODE_PRIVATE);
 
         //Get a reference to the seekbars
-        SeekA = findViewById(R.id.seekA);
+        //SeekA = findViewById(R.id.seekA);
         SeekR = findViewById(R.id.seekR);
         SeekG = findViewById(R.id.seekG);
         SeekB = findViewById(R.id.seekB);
         //Reference the TextView
         ShowColor = findViewById(R.id.textView);
         //This activity implements SeekBar OnSeekBarChangeListener
-        SeekA.setOnSeekBarChangeListener(this);
+        //SeekA.setOnSeekBarChangeListener(this);
         SeekR.setOnSeekBarChangeListener(this);
         SeekG.setOnSeekBarChangeListener(this);
         SeekB.setOnSeekBarChangeListener(this);
@@ -119,28 +115,30 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromTouch) {
 
             //get current ARGB values
-            int A=SeekA.getProgress();
+            //int A=SeekA.getProgress();
+            int A = 200;
             int red=SeekR.getProgress();
             int G=SeekG.getProgress();
             int B=SeekB.getProgress();
             //Reference the value changing
             int id=seekBar.getId();
             //Get the chnaged value
-            if(id == R.id.seekA)
-                A=progress;
-            else if(id == R.id.seekR)
+            //if(id == R.id.seekA)
+            //    A=progress;
+            if(id == R.id.seekR)
                 red=progress;
-            else if(id == R.id.seekA)
+            else if(id == R.id.seekG)
                 G=progress;
-            else if(id == R.id.seekA)
+            else if(id == R.id.seekB)
                 B=progress;
             //Build and show the new color
-            ShowColor.setBackgroundColor(Color.argb(A,red,G,B));
+            ShowColor.setBackgroundColor(Color.argb(A, red,G,B));
             //show the color value
+            //String.format("%02x", red) +String.format("%02x", G)+String.format("%02x", B));
             //ShowColor.setText("0x"+String.format("%02x", A)+String.format("%02x", red)
             //        +String.format("%02x", G)+String.format("%02x", B));
             //some math so text shows (needs improvement for greys)
-            ShowColor.setTextColor(Color.argb(0xff,255-red,255-G,255-B));
+            //ShowColor.setTextColor(Color.argb(0xff,255-red,255-G,255-B));
         };
         public void onStartTrackingTouch(SeekBar seekBar) {
             //Only required due to implements

@@ -20,6 +20,7 @@
 
     // added for color wheel
 
+    <!--
     <TextView
         android:id="@+id/labelA"
         android:layout_width="wrap_content"
@@ -36,20 +37,21 @@
         android:layout_toRightOf="@id/labelA"
         android:max="255"
         android:progress="255" />
+    -->
 
     <TextView
         android:id="@+id/labelR"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/labelA"
         android:text="R"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_centerVertical="true"    />
 
     <SeekBar
         android:id="@+id/seekR"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/seekA"
+
         android:layout_toRightOf="@id/labelR"
         android:layout_centerVertical="true"
         android:layout_alignBottom="@id/labelR"
