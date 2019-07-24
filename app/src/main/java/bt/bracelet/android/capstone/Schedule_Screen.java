@@ -6,9 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.RadioGroup;
 import android.widget.TimePicker;
 import android.widget.ToggleButton;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,11 +34,14 @@ public class Schedule_Screen extends AppCompatActivity {
     private TimePicker time;
     private int hour;
     private int minute;
-    private int pm;
     private Calendar alarmCal;
     private AlarmManager alarmMgr;
     private PendingIntent[] alarmIntentArr = new PendingIntent[7];
     boolean[] daysSelected = new boolean[7];
+    private SharedPreferences preferences;
+    private SharedPreferences.Editor editor;
+    private static final String preferenceFile = "bt.bracelet.android.capstone";
+
 
     // Method to set alarm
     private void setAlarm(int dayOfWeek) {
@@ -47,18 +50,19 @@ public class Schedule_Screen extends AppCompatActivity {
         alarmCal.set(Calendar.DAY_OF_WEEK, dayOfWeek);
         alarmCal.set(Calendar.HOUR_OF_DAY, hour);
         alarmCal.set(Calendar.MINUTE, minute);
-        //alarmCal.set(Calendar.AM_PM, pm);
+
+        //handles if the timer is set for a day in the past( ie. if you set the alarms on wed, but the alarm is set
+        //for sunday, add a week to the timer, to set for this coming sunday rather than last sunday...
+        //did this as timer was going off immediately for the days in the past.
+        if(System.currentTimeMillis() > alarmCal.getTimeInMillis()) {
+            long setNextWeek = alarmCal.getTimeInMillis()+604800000; //add a week to the time.
+            alarmCal.setTimeInMillis(setNextWeek);
+        }
 
         // Set the alarm in the alarm manager, weekly. Each alarmIntentArr index is a day [0,6], dayOfWeek is [1,7]
         // Repeat weekly, until canceled.
         alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, alarmCal.getTimeInMillis(),
-                1000*60, alarmIntentArr[dayOfWeek - 1]);
-    }
-    private void cancelAlarm(Context context){
-        Intent intent = new Intent(context, Schedule_Screen.class);
-        PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(sender);
+                604800000, alarmIntentArr[dayOfWeek - 1]);
     }
 
     @Override
@@ -66,7 +70,9 @@ public class Schedule_Screen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_schedule_screen);
 
-
+        //load shared preferences for the app
+        preferences = getSharedPreferences(preferenceFile, MODE_PRIVATE);
+        editor = preferences.edit();
 
         // Initialize variables
         settingButton = findViewById(R.id.reservedForSettingButton);
@@ -81,11 +87,41 @@ public class Schedule_Screen extends AppCompatActivity {
         day6Button = findViewById(R.id.day6);
         timerButton = findViewById(R.id.TimerButton);
         time = findViewById(R.id.TimePicker);
-        hour = minute = 0;
+
+
+        //get all stored preferences
+        daysSelected[0] = preferences.getBoolean("Sun", false);
+        daysSelected[1] = preferences.getBoolean("Mon", false);
+        daysSelected[2] = preferences.getBoolean("Tue", false);
+        daysSelected[3] = preferences.getBoolean("Wed", false);
+        daysSelected[4] = preferences.getBoolean("Thu", false);
+        daysSelected[5] = preferences.getBoolean("Fri", false);
+        daysSelected[6] = preferences.getBoolean("Sat", false);
+        int savedHour = preferences.getInt("hour",-1);
+        int savedMinute = preferences.getInt("minute",-1);
+
+        //im saving hour and minute to be sure. setting the timer to reflect the time of the current alarm if it is set.
+        if(savedHour !=-1 && savedMinute!=-1){
+            hour = savedHour;
+            minute = savedMinute;
+            time.setHour(hour);
+            time.setMinute(minute);
+        }
+
+        //apply the saved settings
+        day0Button.setChecked(daysSelected[0]);
+        day1Button.setChecked(daysSelected[1]);
+        day2Button.setChecked(daysSelected[2]);
+        day3Button.setChecked(daysSelected[3]);
+        day4Button.setChecked(daysSelected[4]);
+        day5Button.setChecked(daysSelected[5]);
+        day6Button.setChecked(daysSelected[6]);
+        remindOkButton.setChecked(preferences.getBoolean("reminderOn", false));
 
 
         alarmCal = Calendar.getInstance();
-        alarmMgr =  (AlarmManager) getApplicationContext().getSystemService(ALARM_SERVICE);
+        alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+       // alarmMgr =  (AlarmManager) getApplicationContext().getSystemService(ALARM_SERVICE);
         // Intent for the alarm receiver, needed for the alarmIntentArr
         Intent alarmRecIntent = new Intent(getApplicationContext(), AlarmReceiver.class);
         for (int i = 0; i < 7; i++){
@@ -102,13 +138,6 @@ public class Schedule_Screen extends AppCompatActivity {
         * set the view like below.*/
         //currently just setting to AM/PM
         time.setIs24HourView(false);
-
-
-        // Static array of booleans to track what days are selected
-
-        for (int i = 0; i < 7; i++){
-            daysSelected[i] = false;
-        }
 
         // OnClick listeners
 
@@ -133,6 +162,11 @@ public class Schedule_Screen extends AppCompatActivity {
                     hour = time.getHour();
                     minute = time.getMinute();
 
+                    //save the time in the preference file
+                    editor.putInt("hour", hour);
+                    editor.putInt("minute", minute);
+                    editor.apply();
+
 
 
                     //      2: Get days selected
@@ -143,14 +177,21 @@ public class Schedule_Screen extends AppCompatActivity {
                             //      YES. it works outside the app, so it seems we wont need to save settings if we choose this :D
                             // dayIndex is [0,6], Calendar expects days (Su-Sa) to be [1,7]. So add one to the argument.
                             setAlarm(dayIndex + 1);
+
                         }
                     }
+                    //store the state of the reminder button
+                    editor.putBoolean("reminderOn",remindOkButton.isChecked());
+                    editor.apply();
                 }
                 else {
                     // Cancel the alarms
                     if (alarmMgr != null){
                         for (int alarmDayIndex = 0; alarmDayIndex < 7; alarmDayIndex++) {
                             alarmMgr.cancel(alarmIntentArr[alarmDayIndex]);
+                            //update and store state of reminder button
+                            editor.putBoolean("reminderOn",remindOkButton.isChecked());
+                            editor.apply();
                         }
                     }
                 }
@@ -161,6 +202,8 @@ public class Schedule_Screen extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 daysSelected[0] = day0Button.isChecked();
+                editor.putBoolean("Sun", daysSelected[0]);
+                editor.apply();
             }
         });
 
@@ -168,13 +211,19 @@ public class Schedule_Screen extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 daysSelected[1] = day1Button.isChecked();
+                editor.putBoolean("Mon", daysSelected[1]);
+                editor.apply();
             }
         });
 
         day2Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //day2Button.setChecked(true);
+                //daysSelected[2] = true;
                 daysSelected[2] = day2Button.isChecked();
+                editor.putBoolean("Tue", daysSelected[2]);
+                editor.apply();
             }
         });
 
@@ -182,6 +231,8 @@ public class Schedule_Screen extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 daysSelected[3] = day3Button.isChecked();
+                editor.putBoolean("Wed", daysSelected[3]);
+                editor.apply();
             }
         });
 
@@ -189,6 +240,8 @@ public class Schedule_Screen extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 daysSelected[4] = day4Button.isChecked();
+                editor.putBoolean("Thu", daysSelected[4]);
+                editor.apply();
             }
         });
 
@@ -196,6 +249,8 @@ public class Schedule_Screen extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 daysSelected[5] = day5Button.isChecked();
+                editor.putBoolean("Fri", daysSelected[5]);
+                editor.apply();
             }
         });
 
@@ -203,6 +258,8 @@ public class Schedule_Screen extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 daysSelected[6] = day6Button.isChecked();
+                editor.putBoolean("Sat", daysSelected[6]);
+                editor.apply();
             }
         });
 

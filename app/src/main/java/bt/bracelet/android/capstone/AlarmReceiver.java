@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.PowerManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.Console;
@@ -18,10 +19,10 @@ public class AlarmReceiver extends BroadcastReceiver {
         wl.acquire();
 
         // Put here YOUR code.
-
         Toast.makeText(context, "Alarm !!!!!!!!!!", Toast.LENGTH_LONG).show(); // For example
 
         wl.release();
+        Log.i("recv", "in alarm reveiver");
     }
 
 }
