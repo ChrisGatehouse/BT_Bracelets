@@ -15,43 +15,7 @@
         android:layout_alignParentRight="true"
         app:srcCompat="@drawable/ic_settings"
         />
-    <!--<NumberPicker
-        android:id="@+id/schedMins"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        />
-    <NumberPicker
-        android:id="@+id/schedHours"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toLeftOf="@+id/schedMins"
-        />
-    <RadioGroup
-        android:id="@+id/ampmReserve"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/schedMins"
-        android:layout_centerVertical="true"
-        android:checkedButton="@id/am">
 
-        <RadioButton
-            android:id="@+id/am"
-            android:layout_width="wrap_content"
-            android:layout_height="31dp"
-            android:text="@string/clock_am"
-            android:textSize="12sp"
-            tools:text="@string/clock_am" />
-
-        <RadioButton
-            android:id="@+id/pm"
-            android:layout_width="wrap_content"
-            android:layout_height="33dp"
-            android:text="@string/clock_pm"
-            android:textSize="12sp"
-            tools:text="@string/clock_pm" />
-    </RadioGroup> -->
     <TimePicker
         android:id="@+id/TimePicker"
         android:layout_width="wrap_content"

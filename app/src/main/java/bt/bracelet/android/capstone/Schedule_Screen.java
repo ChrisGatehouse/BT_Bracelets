@@ -2,6 +2,7 @@ package bt.bracelet.android.capstone;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -33,9 +34,11 @@ public class Schedule_Screen extends AppCompatActivity {
     private TimePicker time;
     private int hour;
     private int minute;
+    private int pm;
     private Calendar alarmCal;
     private AlarmManager alarmMgr;
-    private PendingIntent[] alarmIntentArr;
+    private PendingIntent[] alarmIntentArr = new PendingIntent[7];
+    boolean[] daysSelected = new boolean[7];
 
     // Method to set alarm
     private void setAlarm(int dayOfWeek) {
@@ -44,17 +47,26 @@ public class Schedule_Screen extends AppCompatActivity {
         alarmCal.set(Calendar.DAY_OF_WEEK, dayOfWeek);
         alarmCal.set(Calendar.HOUR_OF_DAY, hour);
         alarmCal.set(Calendar.MINUTE, minute);
+        //alarmCal.set(Calendar.AM_PM, pm);
 
         // Set the alarm in the alarm manager, weekly. Each alarmIntentArr index is a day [0,6], dayOfWeek is [1,7]
         // Repeat weekly, until canceled.
         alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, alarmCal.getTimeInMillis(),
-                7 * AlarmManager.INTERVAL_DAY, alarmIntentArr[dayOfWeek - 1]);
+                1000*60, alarmIntentArr[dayOfWeek - 1]);
+    }
+    private void cancelAlarm(Context context){
+        Intent intent = new Intent(context, Schedule_Screen.class);
+        PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(sender);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_schedule_screen);
+
+
 
         // Initialize variables
         settingButton = findViewById(R.id.reservedForSettingButton);
@@ -70,6 +82,8 @@ public class Schedule_Screen extends AppCompatActivity {
         timerButton = findViewById(R.id.TimerButton);
         time = findViewById(R.id.TimePicker);
         hour = minute = 0;
+
+
         alarmCal = Calendar.getInstance();
         alarmMgr =  (AlarmManager) getApplicationContext().getSystemService(ALARM_SERVICE);
         // Intent for the alarm receiver, needed for the alarmIntentArr
@@ -91,7 +105,7 @@ public class Schedule_Screen extends AppCompatActivity {
 
 
         // Static array of booleans to track what days are selected
-        boolean[] daysSelected = new boolean[7];
+
         for (int i = 0; i < 7; i++){
             daysSelected[i] = false;
         }
@@ -118,6 +132,9 @@ public class Schedule_Screen extends AppCompatActivity {
                     //      1: Get time from selectors
                     hour = time.getHour();
                     minute = time.getMinute();
+
+
+
                     //      2: Get days selected
                     // Can be done by iterating through the array
                     for (int dayIndex = 0; dayIndex < 7; dayIndex++){
