@@ -121,7 +121,7 @@ public class Schedule_Screen extends AppCompatActivity {
 
         alarmCal = Calendar.getInstance();
         alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-       // alarmMgr =  (AlarmManager) getApplicationContext().getSystemService(ALARM_SERVICE);
+
         // Intent for the alarm receiver, needed for the alarmIntentArr
         Intent alarmRecIntent = new Intent(getApplicationContext(), AlarmReceiver.class);
         for (int i = 0; i < 7; i++){
@@ -219,8 +219,6 @@ public class Schedule_Screen extends AppCompatActivity {
         day2Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //day2Button.setChecked(true);
-                //daysSelected[2] = true;
                 daysSelected[2] = day2Button.isChecked();
                 editor.putBoolean("Tue", daysSelected[2]);
                 editor.apply();
