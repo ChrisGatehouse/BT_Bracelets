@@ -59,7 +59,7 @@
 #include "boards.h"
 #include "app_timer.h"
 #include "app_button.h"
-#include "ble_lbs.h"
+#include "ble_bracelet.h"
 #include "nrf_ble_gatt.h"
 #include "nrf_ble_qwr.h"
 #include "nrf_pwr_mgmt.h"
@@ -105,10 +105,7 @@
 #define THIRD_LED                       NRF_GPIO_PIN_MAP(1,12)                  // Connected to P1.12
 //#define ADVERTISING_BUTTON              2                                       // Button to start advertising
 
-volatile int advertise_start_flag = 0;
-
-
-BLE_LBS_DEF(m_lbs);                                                             /**< LED Button Service instance. */
+BLE_BRACELET_DEF(m_bracelet);                                                             /**< LED Button Service instance. */
 NRF_BLE_GATT_DEF(m_gatt);                                                       /**< GATT module instance. */
 NRF_BLE_QWR_DEF(m_qwr);                                                         /**< Context for the Queued Write module.*/
 
@@ -225,7 +222,7 @@ static void advertising_init(void)
     ble_advdata_t advdata;
     ble_advdata_t srdata;
 
-    ble_uuid_t adv_uuids[] = {{LBS_UUID_SERVICE, m_lbs.uuid_type}};
+    ble_uuid_t adv_uuids[] = {{BRACELET_UUID_SERVICE, m_bracelet.uuid_type}};
 
     // Build and set advertising data.
     memset(&advdata, 0, sizeof(advdata));
@@ -277,10 +274,10 @@ static void nrf_qwr_error_handler(uint32_t nrf_error)
 
 /**@brief Function for handling write events to the LED characteristic.
  *
- * @param[in] p_lbs     Instance of LED Button Service to which the write applies.
+ * @param[in] p_bracelet     Instance of service to which the write applies.
  * @param[in] led_state Written/desired state of the LED.
  */
-static void led_write_handler(uint16_t conn_handle, ble_lbs_t * p_lbs, uint8_t led_state)
+static void led_write_handler(uint16_t conn_handle, ble_bracelet_t * p_bracelet, uint8_t led_state)
 {
     if (led_state)
     {
@@ -318,7 +315,7 @@ void blinksomelights()
 static void services_init(void)
 {
     ret_code_t         err_code;
-    ble_lbs_init_t     init     = {0};
+    ble_bracelet_init_t     init     = {0};
     nrf_ble_qwr_init_t qwr_init = {0};
 
     // Initialize Queued Write Module.
@@ -327,10 +324,10 @@ static void services_init(void)
     err_code = nrf_ble_qwr_init(&m_qwr, &qwr_init);
     APP_ERROR_CHECK(err_code);
 
-    // Initialize LBS.
+    // Initialize service.
     init.led_write_handler = led_write_handler;
 
-    err_code = ble_lbs_init(&m_lbs, &init);
+    err_code = ble_bracelet_init(&m_bracelet, &init);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -534,9 +531,8 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
           
             NRF_LOG_INFO("Send button state change.");
             //advertising_start();
-            //advertise_start_flag = 1;
             //disconnect();
-            err_code = ble_lbs_on_button_change(m_conn_handle, &m_lbs, button_action);
+            err_code = ble_bracelet_on_button_change(m_conn_handle, &m_bracelet, button_action);
             if (err_code != NRF_SUCCESS &&
                 err_code != BLE_ERROR_INVALID_CONN_HANDLE &&
                 err_code != NRF_ERROR_INVALID_STATE &&
@@ -654,8 +650,6 @@ static void idle_state_handle(void)
 //==========================TESTING====================
 static void leds_init(void)
 {
-    ret_code_t err_code;
-
     bsp_board_init(BSP_INIT_LEDS);
     nrf_gpio_cfg_output(MAIN_LED);
     nrf_gpio_pin_write(MAIN_LED, 1);
@@ -688,14 +682,6 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
-        /*
-        if (advertise_start_flag)
-        {
-          advertise_start_flag = 0;
-          advertising_start();
-          blinksomelights();
-        }
-        */
         idle_state_handle();
     }
 }
