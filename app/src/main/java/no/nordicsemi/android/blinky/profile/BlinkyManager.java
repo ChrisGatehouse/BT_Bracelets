@@ -54,11 +54,11 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 	/** LED characteristic UUID. */
 	private final static UUID LBS_UUID_LED_CHAR = UUID.fromString("00001525-1212-efde-1523-785feabcd123");
 	/** Color characteristic UUID. */
-	private final static UUID COLOR_UUID = UUID.fromString("81c3a1aa-c3e3-4c44-b6e6-ef733e389009");
+	private final static UUID COLOR_UUID = UUID.fromString("00001526-1212-efde-1523-785feabcd123");
 	/** Vibrate characteristic UUID. */
-	private final static UUID VIBRATE_UUID = UUID.fromString("53b73a99-0531-47a3-9591-d31e554fd9c4");
+	private final static UUID VIBRATE_UUID = UUID.fromString("00001527-1212-efde-1523-785feabcd123");
 	/** Timercharacteristic UUID. */
-	private final static UUID TIMER_UUID = UUID.fromString("f26a29bc-7221-4f94-a458-b24a4935e662");
+	private final static UUID TIMER_UUID = UUID.fromString("00001528-1212-efde-1523-785feabcd123");
 
 	private BluetoothGattCharacteristic mButtonCharacteristic, mLedCharacteristic, mColorCharacteristic, mVibrateCharacteristic, mTimerCharacteristic;
 	private LogSession mLogSession;
@@ -244,7 +244,7 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 
 
 	/**
-	 * The LED callback will be notified when the LED state was read or sent to the target device.
+	 * The vibrate callback will be notified when the vibrate state was read or sent to the target device.
 	 * <p>
 	 * This callback implements both {@link no.nordicsemi.android.ble.callback.DataReceivedCallback}
 	 * and {@link no.nordicsemi.android.ble.callback.DataSentCallback} and calls the same
@@ -258,9 +258,9 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 		@Override
 		public void onLedStateChanged(@NonNull final BluetoothDevice device,
 									  final boolean on) {
-			mLedOn = on;
-			log(LogContract.Log.Level.APPLICATION, "LED " + (on ? "ON" : "OFF"));
-			mCallbacks.onLedStateChanged(device, on);
+			//mLedOn = on;
+			log(LogContract.Log.Level.APPLICATION, "Vibrate toggled");
+			//mCallbacks.onLedStateChanged(device, on);
 		}
 
 		@Override
@@ -275,7 +275,7 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 		@Override
 		public void onLedStateChanged(@NonNull final BluetoothDevice device,
 									  final boolean on) {
-			log(Log.WARN, "Invalid data received: " );
+			log(Log.WARN, "Hello from color characteristic callback :] " );
 		}
 
 		@Override
@@ -290,7 +290,7 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 		@Override
 		public void onLedStateChanged(@NonNull final BluetoothDevice device,
 									  final boolean on) {
-			log(Log.WARN, "Invalid data received: " );
+			log(Log.WARN, "Hello from timer characteristic callback :] " );
 		}
 
 		@Override
