@@ -32,6 +32,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
@@ -39,6 +41,7 @@ import no.nordicsemi.android.ble.data.Data;
 import no.nordicsemi.android.blinky.profile.callback.BlinkyButtonDataCallback;
 import no.nordicsemi.android.blinky.profile.callback.BlinkyLedDataCallback;
 import no.nordicsemi.android.blinky.profile.data.BlinkyLED;
+import no.nordicsemi.android.blinky.profile.data.CustomData;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.log.LogSession;
 import no.nordicsemi.android.log.Logger;
@@ -50,8 +53,14 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 	private final static UUID LBS_UUID_BUTTON_CHAR = UUID.fromString("00001524-1212-efde-1523-785feabcd123");
 	/** LED characteristic UUID. */
 	private final static UUID LBS_UUID_LED_CHAR = UUID.fromString("00001525-1212-efde-1523-785feabcd123");
+	/** Color characteristic UUID. */
+	private final static UUID COLOR_UUID = UUID.fromString("81c3a1aa-c3e3-4c44-b6e6-ef733e389009");
+	/** Vibrate characteristic UUID. */
+	private final static UUID VIBRATE_UUID = UUID.fromString("53b73a99-0531-47a3-9591-d31e554fd9c4");
+	/** Timercharacteristic UUID. */
+	private final static UUID TIMER_UUID = UUID.fromString("f26a29bc-7221-4f94-a458-b24a4935e662");
 
-	private BluetoothGattCharacteristic mButtonCharacteristic, mLedCharacteristic;
+	private BluetoothGattCharacteristic mButtonCharacteristic, mLedCharacteristic, mColorCharacteristic, mVibrateCharacteristic, mTimerCharacteristic;
 	private LogSession mLogSession;
 	private boolean mSupported;
 	private boolean mLedOn;
@@ -144,6 +153,7 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 		@Override
 		protected void initialize() {
 			setNotificationCallback(mButtonCharacteristic).with(mButtonCallback);
+			//readCharacteristic(mVibrateCharacteristic).with(mVibrateCallback).enqueue();
 			readCharacteristic(mLedCharacteristic).with(mLedCallback).enqueue();
 			readCharacteristic(mButtonCharacteristic).with(mButtonCallback).enqueue();
 			enableNotifications(mButtonCharacteristic).enqueue();
@@ -155,8 +165,12 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 			if (service != null) {
 				mButtonCharacteristic = service.getCharacteristic(LBS_UUID_BUTTON_CHAR);
 				mLedCharacteristic = service.getCharacteristic(LBS_UUID_LED_CHAR);
+				mVibrateCharacteristic = service.getCharacteristic(VIBRATE_UUID);
+				mColorCharacteristic = service.getCharacteristic(COLOR_UUID);
+				mTimerCharacteristic = service.getCharacteristic(TIMER_UUID);
 			}
 
+			// TODO: Do we need to add this for each of our new characteristics?
 			boolean writeRequest = false;
 			if (mLedCharacteristic != null) {
 				final int rxProperties = mLedCharacteristic.getProperties();
@@ -171,6 +185,9 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 		protected void onDeviceDisconnected() {
 			mButtonCharacteristic = null;
 			mLedCharacteristic = null;
+			mTimerCharacteristic = null;
+			mColorCharacteristic = null;
+			mVibrateCharacteristic = null;
 		}
 	};
 
@@ -191,5 +208,98 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 		log(Log.VERBOSE, "Turning LED " + (on ? "ON" : "OFF") + "...");
 		writeCharacteristic(mLedCharacteristic, on ? BlinkyLED.turnOn() : BlinkyLED.turnOff())
 				.with(mLedCallback).enqueue();
+
 	}
+
+	// Sends a color characteristic to the micro-controller
+	public void SendColor(int red, int green, int blue)
+	{
+		byte[] rgb = new byte[3];
+
+		rgb[0] = (byte)blue;
+		rgb[1] = (byte)green;
+		rgb[2] = (byte)red;
+
+		writeCharacteristic(mColorCharacteristic, rgb).with(mColorCharacteristicCallback).enqueue();
+	}
+
+	/// sends a vibrate on/off signal to the micro-controller
+	public void SendVibrate(boolean on)
+	{
+		log(Log.VERBOSE, "Turning LED " + (on ? "ON" : "OFF") + "...");
+		writeCharacteristic(mVibrateCharacteristic, on ? BlinkyLED.turnOn() : BlinkyLED.turnOff())
+				.with(mVibrateCallback).enqueue();
+	}
+
+	// Takes an integer representing time in seconds and converts that value
+	// into a byte array and sends that byte array to the micro-controller
+	public void SendTimer(int time)
+	{
+		ByteBuffer b = ByteBuffer.allocate(4);
+		b.order(ByteOrder.LITTLE_ENDIAN); // optional, the initial order of a byte buffer is always BIG_ENDIAN.
+		b.putInt(time);
+		byte[] result = b.array();
+		writeCharacteristic(mTimerCharacteristic, result).with(mTimerCharacteristicCallback).enqueue();
+	}
+
+
+	/**
+	 * The LED callback will be notified when the LED state was read or sent to the target device.
+	 * <p>
+	 * This callback implements both {@link no.nordicsemi.android.ble.callback.DataReceivedCallback}
+	 * and {@link no.nordicsemi.android.ble.callback.DataSentCallback} and calls the same
+	 * method on success.
+	 * <p>
+	 * If the data received were invalid, the
+	 * {@link BlinkyLedDataCallback#onInvalidDataReceived(BluetoothDevice, Data)} will be
+	 * called.
+	 */
+	private final BlinkyLedDataCallback mVibrateCallback = new BlinkyLedDataCallback() {
+		@Override
+		public void onLedStateChanged(@NonNull final BluetoothDevice device,
+									  final boolean on) {
+			mLedOn = on;
+			log(LogContract.Log.Level.APPLICATION, "LED " + (on ? "ON" : "OFF"));
+			mCallbacks.onLedStateChanged(device, on);
+		}
+
+		@Override
+		public void onInvalidDataReceived(@NonNull final BluetoothDevice device,
+										  @NonNull final Data data) {
+			// Data can only invalid if we read them. We assume the app always sends correct data.
+			log(Log.WARN, "Invalid data received: " + data);
+		}
+	};
+
+	private final BlinkyLedDataCallback mColorCharacteristicCallback = new BlinkyLedDataCallback() {
+		@Override
+		public void onLedStateChanged(@NonNull final BluetoothDevice device,
+									  final boolean on) {
+			log(Log.WARN, "Invalid data received: " );
+		}
+
+		@Override
+		public void onInvalidDataReceived(@NonNull final BluetoothDevice device,
+										  @NonNull final Data data) {
+			// Data can only invalid if we read them. We assume the app always sends correct data.
+			log(Log.WARN, "Invalid data received: " + data);
+		}
+	};
+
+	private final BlinkyLedDataCallback mTimerCharacteristicCallback = new BlinkyLedDataCallback() {
+		@Override
+		public void onLedStateChanged(@NonNull final BluetoothDevice device,
+									  final boolean on) {
+			log(Log.WARN, "Invalid data received: " );
+		}
+
+		@Override
+		public void onInvalidDataReceived(@NonNull final BluetoothDevice device,
+										  @NonNull final Data data) {
+			// Data can only invalid if we read them. We assume the app always sends correct data.
+			log(Log.WARN, "Invalid data received: " + data);
+		}
+	};
+
+
 }
