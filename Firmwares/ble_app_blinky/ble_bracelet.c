@@ -51,11 +51,36 @@ static void on_write(ble_bracelet_t * p_bracelet, ble_evt_t const * p_ble_evt)
 {
     ble_gatts_evt_write_t const * p_evt_write = &p_ble_evt->evt.gatts_evt.params.write;
 
+    // LED handler
     if (   (p_evt_write->handle == p_bracelet->led_char_handles.value_handle)
         && (p_evt_write->len == 1)
         && (p_bracelet->led_write_handler != NULL))
     {
         p_bracelet->led_write_handler(p_ble_evt->evt.gap_evt.conn_handle, p_bracelet, p_evt_write->data[0]);
+    }
+
+    // color handler
+    if (   (p_evt_write->handle == p_bracelet->color_char_handles.value_handle)
+        && (p_evt_write->len == 4)
+        && (p_bracelet->color_write_handler != NULL))
+    {
+        p_bracelet->color_write_handler(p_ble_evt->evt.gap_evt.conn_handle, p_bracelet, ((uint32_t *)(p_evt_write->data))[0] & 0x00FFFFFF);
+    }
+
+    // vibrate handler
+    if (   (p_evt_write->handle == p_bracelet->vibrate_char_handles.value_handle)
+        && (p_evt_write->len == 1)
+        && (p_bracelet->vibrate_write_handler != NULL))
+    {
+        p_bracelet->vibrate_write_handler(p_ble_evt->evt.gap_evt.conn_handle, p_bracelet, p_evt_write->data[0]);
+    }
+
+    // timer handler
+    if (   (p_evt_write->handle == p_bracelet->timer_char_handles.value_handle)
+        && (p_evt_write->len == 4)
+        && (p_bracelet->timer_write_handler != NULL))
+    {
+        p_bracelet->timer_write_handler(p_ble_evt->evt.gap_evt.conn_handle, p_bracelet, ((uint32_t *)(p_evt_write->data))[0]);
     }
 }
 
