@@ -90,6 +90,7 @@
       <file file_name="../../../../../../components/libraries/bsp/bsp.h" />
       <file file_name="../../../../../../components/libraries/bsp/bsp.c" />
       <file file_name="../../../../../../components/libraries/delay/nrf_delay.h" />
+      <file file_name="../../../ble_bracelet.c" />
     </folder>
     <folder Name="nRF_Segger_RTT">
       <file file_name="../../../../../../external/segger_rtt/SEGGER_RTT.c" />
