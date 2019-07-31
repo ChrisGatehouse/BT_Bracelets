@@ -87,7 +87,7 @@
 						android:layout_height="wrap_content"
 						android:paddingEnd="@dimen/activity_horizontal_margin"
 						android:paddingStart="@dimen/activity_horizontal_margin"
-						android:text="@string/led_summary"
+						android:text="Toggle the switch to turn the LEDs on"
 						app:layout_constraintLeft_toLeftOf="parent"
 						app:layout_constraintTop_toBottomOf="@+id/led_tool_bar"/>
 

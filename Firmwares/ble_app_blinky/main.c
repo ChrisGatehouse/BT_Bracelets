@@ -59,7 +59,7 @@
 #include "boards.h"
 #include "app_timer.h"
 #include "app_button.h"
-#include "ble_lbs.h"
+#include "ble_bracelet.h"
 #include "nrf_ble_gatt.h"
 #include "nrf_ble_qwr.h"
 #include "nrf_pwr_mgmt.h"
@@ -69,6 +69,11 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 #include "bsp.h"
+
+#include "app_timer.h"
+#include "nrf_drv_clock.h"
+#include "ws2812_spi.h"
+#include "stdarg.h"
 
 
 #define ADVERTISING_LED                 BSP_BOARD_LED_0                         /**< Is on when device is advertising. */
@@ -99,16 +104,20 @@
 
 #define DEAD_BEEF                       0xDEADBEEF                              /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
+#define NLEDS                           30                                      // Amount of LEDS on the bracelet
+struct ws2812 leds;
+DECLARE_TX_BUFFER(tx_buffer, NLEDS);
+DECLARE_COLOR_BUFFER(colors, NLEDS);
+uint32_t timeout = 0;
+
 // Our code
 #define MAIN_LED                        NRF_GPIO_PIN_MAP(1,10)                  // Connected to P1.10 BLUE
 #define SECOND_LED                      NRF_GPIO_PIN_MAP(1,11)                  // Connected to P1.11 BLUE
 #define THIRD_LED                       NRF_GPIO_PIN_MAP(1,12)                  // Connected to P1.12
+#define SPI_PIN                         NRF_GPIO_PIN_MAP(1,14)
 //#define ADVERTISING_BUTTON              2                                       // Button to start advertising
 
-volatile int advertise_start_flag = 0;
-
-
-BLE_LBS_DEF(m_lbs);                                                             /**< LED Button Service instance. */
+BLE_BRACELET_DEF(m_bracelet);                                                             /**< LED Button Service instance. */
 NRF_BLE_GATT_DEF(m_gatt);                                                       /**< GATT module instance. */
 NRF_BLE_QWR_DEF(m_qwr);                                                         /**< Context for the Queued Write module.*/
 
@@ -117,6 +126,9 @@ static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID;                        
 static uint8_t m_adv_handle = BLE_GAP_ADV_SET_HANDLE_NOT_SET;                   /**< Advertising handle used to identify an advertising set. */
 static uint8_t m_enc_advdata[BLE_GAP_ADV_SET_DATA_SIZE_MAX];                    /**< Buffer for storing an encoded advertising set. */
 static uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX];         /**< Buffer for storing an encoded scan data. */
+
+static const app_timer_id_t m_single_shot_timer_id;
+APP_TIMER_DEF(m_single_shot_timer_id);
 
 /**@brief Struct that contains pointers to the encoded advertising data. */
 static ble_gap_adv_data_t m_adv_data =
@@ -225,7 +237,7 @@ static void advertising_init(void)
     ble_advdata_t advdata;
     ble_advdata_t srdata;
 
-    ble_uuid_t adv_uuids[] = {{LBS_UUID_SERVICE, m_lbs.uuid_type}};
+    ble_uuid_t adv_uuids[] = {{BRACELET_UUID_SERVICE, m_bracelet.uuid_type}};
 
     // Build and set advertising data.
     memset(&advdata, 0, sizeof(advdata));
@@ -277,10 +289,10 @@ static void nrf_qwr_error_handler(uint32_t nrf_error)
 
 /**@brief Function for handling write events to the LED characteristic.
  *
- * @param[in] p_lbs     Instance of LED Button Service to which the write applies.
+ * @param[in] p_bracelet     Instance of service to which the write applies.
  * @param[in] led_state Written/desired state of the LED.
  */
-static void led_write_handler(uint16_t conn_handle, ble_lbs_t * p_lbs, uint8_t led_state)
+static void led_write_handler(uint16_t conn_handle, ble_bracelet_t * p_bracelet, uint8_t led_state)
 {
     if (led_state)
     {
@@ -318,7 +330,7 @@ void blinksomelights()
 static void services_init(void)
 {
     ret_code_t         err_code;
-    ble_lbs_init_t     init     = {0};
+    ble_bracelet_init_t     init     = {0};
     nrf_ble_qwr_init_t qwr_init = {0};
 
     // Initialize Queued Write Module.
@@ -327,10 +339,10 @@ static void services_init(void)
     err_code = nrf_ble_qwr_init(&m_qwr, &qwr_init);
     APP_ERROR_CHECK(err_code);
 
-    // Initialize LBS.
+    // Initialize service.
     init.led_write_handler = led_write_handler;
 
-    err_code = ble_lbs_init(&m_lbs, &init);
+    err_code = ble_bracelet_init(&m_bracelet, &init);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -534,9 +546,8 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
           
             NRF_LOG_INFO("Send button state change.");
             //advertising_start();
-            //advertise_start_flag = 1;
             //disconnect();
-            err_code = ble_lbs_on_button_change(m_conn_handle, &m_lbs, button_action);
+            err_code = ble_bracelet_on_button_change(m_conn_handle, &m_bracelet, button_action);
             if (err_code != NRF_SUCCESS &&
                 err_code != BLE_ERROR_INVALID_CONN_HANDLE &&
                 err_code != NRF_ERROR_INVALID_STATE &&
@@ -635,6 +646,29 @@ static void power_management_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
+void led_count_down()
+{
+  uint32_t timeLeft;
+  int lightsOn = 1;
+  int interval = timeout / NLEDS;
+
+  while(lightsOn != NLEDS)
+  {
+    timeLeft = (int)((app_timer_cnt_get()) * 1000 / 32768);
+    if((timeLeft > (interval * lightsOn)) && (timeLeft <= ((interval * lightsOn) + interval)))
+    {
+      nrf_delay_ms(5);
+      ws2812_set_rgb(&leds, lightsOn - 1, 0, 0, 0);
+      ws2812_spi_show(&leds);
+      lightsOn++;
+    }
+    nrf_delay_ms(5);
+  }
+
+  nrf_delay_ms(interval);
+  ws2812_set_rgb(&leds, NLEDS - 1, 0, 0, 0);
+  ws2812_spi_show(&leds);
+}
 
 /**@brief Function for handling the idle state (main loop).
  *
@@ -650,12 +684,233 @@ static void idle_state_handle(void)
 
 }
 
+static void all_led_off()
+{
+  int delay = 10;
+  for(int i = 0; i < NLEDS; i++)
+  {
+    ws2812_set_rgb(&leds, i, 0, 0, 0);
+  }
+  nrf_delay_ms(delay);
+  ws2812_spi_show(&leds);
+}
 
+static void flash_show(int r, int g, int b)
+{
+  int delay = 200;
+  for(int i = 0; i < 3; i++)
+  {
+    for(int j = 0; j < NLEDS; j++)
+    {
+      ws2812_set_rgb(&leds, j, r, g, b);
+    }
+    nrf_delay_ms(delay);
+    ws2812_spi_show(&leds);
+    for(int j = 0; j < NLEDS; j++)
+    {
+      ws2812_set_rgb(&leds, j, 0, 0, 0); 
+    }
+    nrf_delay_ms(delay);
+    ws2812_spi_show(&leds);
+  }
+
+  all_led_off();
+}
+
+static void wave_show(int r, int g, int b)
+{
+  int delay = 10;
+  for(int i = 0; i < 3; i++)
+  {
+    for(int j = 0; j < NLEDS; j++)
+    {
+      ws2812_set_rgb(&leds, j, r, g, b);
+      ws2812_spi_show(&leds);
+      nrf_delay_ms(delay);
+    }
+    for(int j = NLEDS - 1; j >= 0; j--)
+    {
+      ws2812_set_rgb(&leds, j, 0, 0, 0);
+      ws2812_spi_show(&leds);
+      nrf_delay_ms(delay);
+    }
+  }
+
+  all_led_off();
+}
+
+static void single_wave_show(int r, int g, int b)
+{
+  int delay = 5;
+  for(int i = 0; i < 3; i++)
+  {
+    for(int j = 0; j < NLEDS; j++)
+    {
+      ws2812_set_rgb(&leds, j, r, g, b);
+      ws2812_spi_show(&leds);
+      nrf_delay_ms(delay);
+      ws2812_set_rgb(&leds, j, 0, 0, 0);
+      ws2812_spi_show(&leds);
+      nrf_delay_ms(delay);
+    }
+    for(int j = NLEDS - 1; j >= 0; j--)
+    {
+      ws2812_set_rgb(&leds, j, r, g, b);
+      ws2812_spi_show(&leds);
+      nrf_delay_ms(delay);
+      ws2812_set_rgb(&leds, j, 0, 0, 0);
+      ws2812_spi_show(&leds);
+      nrf_delay_ms(delay);
+    }
+  }
+
+  all_led_off();
+}
+
+static void shift_show(int r, int g, int b)
+{
+  int delay = 300;
+  for(int i = 0; i < 9; i += 2)
+  {
+    for(int j = 0; j < NLEDS; j++)
+    {
+      if(j % 2)
+      {
+        ws2812_set_rgb(&leds, j, r, g, b);
+      }
+      else
+      {
+        ws2812_set_rgb(&leds, j, 0, 0, 0);
+      }
+    }
+    nrf_delay_ms(delay);
+    ws2812_spi_show(&leds);
+    for(int j = 0; j < NLEDS; j++)
+    {
+      if(j % 2 == 0)
+      {
+        ws2812_set_rgb(&leds, j, r, g, b);
+      }
+      else
+      {
+        ws2812_set_rgb(&leds, j, 0, 0, 0);
+      }
+    }
+
+    nrf_delay_ms(delay);
+    ws2812_spi_show(&leds);
+  }
+  nrf_delay_ms(delay);
+  ws2812_spi_show(&leds);
+
+  all_led_off();
+}
+
+static void from_center_loop_show(int r, int g, int b)
+{
+    int delay = 50;
+    int center = NLEDS / 2;
+    
+    for(int i = 0; i < 4; i++)
+    {
+      for(int j = 0; j <= center; j++)
+      {
+        if(center + j < NLEDS)
+        {
+          ws2812_set_rgb(&leds, center + j, r, g, b);
+        }
+
+        if(center - j >= 0)
+        {
+          ws2812_set_rgb(&leds, center - j, r, g, b);
+        }
+        nrf_delay_ms(delay);
+        ws2812_spi_show(&leds);
+      }
+
+      for(int k = 0; k < NLEDS; k++)
+      {
+        ws2812_set_rgb(&leds, k, 0, 0, 0);
+      }
+      nrf_delay_ms(delay);
+      ws2812_spi_show(&leds);
+    }
+    
+    nrf_delay_ms(delay);
+    ws2812_spi_show(&leds);
+
+    all_led_off();
+}
+
+static void led_complete_show()
+{
+  int r = 255;
+  int g = 0;
+  int b = 0;
+  int delay = 0;
+
+  flash_show(r, g, b);
+  nrf_delay_ms(delay);
+  wave_show(r, g, b);
+  nrf_delay_ms(delay);
+  single_wave_show(r, g, b);
+  nrf_delay_ms(delay);
+  shift_show(r, g, b);
+  nrf_delay_ms(delay);
+  from_center_loop_show(r, g, b);
+}
+
+/**@brief Timeout handler for the single shot timer.
+ */
+static void single_shot_timer_handler(void * p_context)
+{
+  led_complete_show();
+  nrf_delay_ms(50);
+
+  for(int i = 0; i < NLEDS; i++)
+  {
+    ws2812_set_rgb(&leds, i, 0, 0, 0);
+  } 
+
+  ws2812_spi_show(&leds);
+}
+
+/**@brief Create timers.
+ */
+static void create_timer()
+{
+    ret_code_t err_code;
+    err_code = app_timer_create(&m_single_shot_timer_id,
+                                APP_TIMER_MODE_SINGLE_SHOT,
+                                single_shot_timer_handler);
+    APP_ERROR_CHECK(err_code);
+}
+
+static void start_timer(uint32_t timer_amount)
+{
+  uint32_t timeout = 0;
+  ret_code_t err_code;
+
+  timeout += timer_amount;
+
+  err_code = app_timer_start(m_single_shot_timer_id, APP_TIMER_TICKS(timeout), NULL);
+  APP_ERROR_CHECK(err_code);
+
+  led_count_down();
+}
+
+static void led_color_init(int r, int g, int b)
+{
+  for(int i = 0; i < NLEDS; i++)
+  {
+    ws2812_set_rgb(&leds, i, r, g, b);
+  }
+
+  ws2812_spi_show(&leds);
+}
 //==========================TESTING====================
 static void leds_init(void)
 {
-    ret_code_t err_code;
-
     bsp_board_init(BSP_INIT_LEDS);
     nrf_gpio_cfg_output(MAIN_LED);
     nrf_gpio_pin_write(MAIN_LED, 1);
@@ -680,6 +935,12 @@ int main(void)
     advertising_init();
     conn_params_init();
     app_button_enable();
+    ws2812_init(&leds, NLEDS, SPI_PIN, 100, NRF_SPIM0, colors, tx_buffer);
+    led_color_init(255, 0, 0);
+    app_timer_init();
+    create_timer();
+    timeout = 5000;
+    start_timer(timeout);
     
     // Start execution.
     NRF_LOG_INFO("Blinky example started.");
@@ -688,14 +949,6 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
-        /*
-        if (advertise_start_flag)
-        {
-          advertise_start_flag = 0;
-          advertising_start();
-          blinksomelights();
-        }
-        */
         idle_state_handle();
     }
 }
