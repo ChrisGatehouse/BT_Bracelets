@@ -47,6 +47,7 @@ import no.nordicsemi.android.log.LogSession;
 import no.nordicsemi.android.log.Logger;
 
 public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
+
 	/** Nordic Blinky Service UUID. */
 	public final static UUID LBS_UUID_SERVICE = UUID.fromString("00001523-1212-efde-1523-785feabcd123");
 	/** BUTTON characteristic UUID. */
@@ -68,6 +69,7 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 	public BlinkyManager(@NonNull final Context context) {
 		super(context);
 	}
+
 
 	@NonNull
 	@Override
@@ -226,7 +228,7 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 	/// sends a vibrate on/off signal to the micro-controller
 	public void SendVibrate(boolean on)
 	{
-		log(Log.VERBOSE, "Turning LED " + (on ? "ON" : "OFF") + "...");
+		log(Log.VERBOSE, "Turning vibration " + (on ? "ON" : "OFF") + "...");
 		writeCharacteristic(mVibrateCharacteristic, on ? BlinkyLED.turnOn() : BlinkyLED.turnOff())
 				.with(mVibrateCallback).enqueue();
 	}

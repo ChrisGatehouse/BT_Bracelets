@@ -1,5 +1,6 @@
 package bt.bracelet.android.capstone;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import no.nordicsemi.android.blinky.R;
 import no.nordicsemi.android.blinky.ScannerActivity;
+import no.nordicsemi.android.blinky.profile.BlinkyManager;
 
 // adding for color sliders
 import android.graphics.Color;
@@ -47,6 +49,8 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
     SeekBar SeekB;
     //Reference the TextView
     TextView ShowColor;
+    //Context context = getApplicationContext();
+
 
 
     @Override
@@ -55,7 +59,6 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
         setContentView(R.layout.activity_settings__screen);
         preferences = getSharedPreferences(preferenceFile, MODE_PRIVATE);
         //PreferenceManager.getDefaultSharedPreferences(this);//getSharedPreferences(preferenceFile,MODE_PRIVATE);
-
         //Get a reference to the seekbars
         //SeekA = findViewById(R.id.seekA);
         SeekR = findViewById(R.id.seekR);
@@ -139,6 +142,10 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
             //        +String.format("%02x", G)+String.format("%02x", B));
             //some math so text shows (needs improvement for greys)
             //ShowColor.setTextColor(Color.argb(0xff,255-red,255-G,255-B));
+            Context context = getApplicationContext();
+            BlinkyManager blinky1 = new BlinkyManager(context);
+            blinky1.SendColor(1,2,3);
+
         };
         public void onStartTrackingTouch(SeekBar seekBar) {
             //Only required due to implements
@@ -146,7 +153,6 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
         public void onStopTrackingTouch(SeekBar seekBar) {
             //Only required due to implements
         }
-
 
 /*
         colorButton.setOnClickListener(new View.OnClickListener() {
