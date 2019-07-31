@@ -57,8 +57,9 @@ public class Schedule_Screen extends AppCompatActivity {
         if(System.currentTimeMillis() > alarmCal.getTimeInMillis()) {
             long setNextWeek = alarmCal.getTimeInMillis()+604800000; //add a week to the time.
             alarmCal.setTimeInMillis(setNextWeek);
+            Log.i("tag", "timer for " + dayOfWeek + " is set in past. setting for future.");
         }
-
+        Log.i("tag:", "timer is being set for "+alarmCal.getTimeInMillis() + " current time: "+System.currentTimeMillis());
         // Set the alarm in the alarm manager, weekly. Each alarmIntentArr index is a day [0,6], dayOfWeek is [1,7]
         // Repeat weekly, until canceled.
         alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, alarmCal.getTimeInMillis(),
@@ -282,6 +283,7 @@ public class Schedule_Screen extends AppCompatActivity {
                 and reset the text on the button
                  */
             }
+
         });
 
     }
