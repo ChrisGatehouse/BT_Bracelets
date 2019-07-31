@@ -21,26 +21,24 @@ public class AlarmReceiver extends BroadcastReceiver {
     private PowerManager.WakeLock wl;
     private NotificationManager manager;
    // private NotificationChannel channel;
-    private static final String channel_id = "";
+    private static final String channel_id = "minimeID";
     private static final CharSequence channel_name = "android channel";
 
     @Override
     public void onReceive(Context context, Intent intent) {
         // TODO: send alarm (timer done) to the bracelet
-        Log.i("tag", "in onReceive");
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, ":Tag");
-        wl.acquire(30000);
-        Log.i("Tag:","before channel creation");
+        wl.acquire(15000);
+
         createNotificationChannel(context);
-        Log.i("Tag:", "after channnel creation");
+
         sendNotification(context);
-        Log.i("Tag:", "after notification send");
+
         // Put here YOUR code.
         Toast.makeText(context, "Alarm !!!!!!!!!!", Toast.LENGTH_LONG).show(); // For example
 
         wl.release();
-        Log.i("recv", "in alarm reveiver");
     }
     private void createNotificationChannel(Context context){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
