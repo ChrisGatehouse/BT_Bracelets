@@ -63,7 +63,9 @@ public class Timer_Screen extends AppCompatActivity {
         final Intent btIntent = getIntent();
         final DiscoveredBluetoothDevice device = btIntent.getParcelableExtra(EXTRA_DEVICE);
         blinkyViewModel = ViewModelProviders.of(this).get(BlinkyViewModel.class);
-        blinkyViewModel.connect(device);
+        if(device != null) {
+            blinkyViewModel.connect(device);
+        }
 
 
 
