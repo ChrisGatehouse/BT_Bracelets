@@ -16,6 +16,7 @@ import androidx.core.app.NotificationCompat;
 import java.io.Console;
 
 import no.nordicsemi.android.blinky.R;
+import no.nordicsemi.android.blinky.profile.BlinkyManager;
 
 public class AlarmReceiver extends BroadcastReceiver {
     private PowerManager.WakeLock wl;
@@ -32,8 +33,10 @@ public class AlarmReceiver extends BroadcastReceiver {
         wl.acquire(15000);
 
         createNotificationChannel(context);
-
         sendNotification(context);
+        
+        BlinkyManager blinky1 = new BlinkyManager(context);
+        blinky1.SendVibrate(true);
 
         // Put here YOUR code.
         Toast.makeText(context, "Alarm !!!!!!!!!!", Toast.LENGTH_LONG).show(); // For example

@@ -18,6 +18,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import no.nordicsemi.android.blinky.R;
+import no.nordicsemi.android.blinky.profile.BlinkyManager;
 
 public class Schedule_Screen extends AppCompatActivity {
     private FloatingActionButton settingButton;
@@ -274,6 +275,9 @@ public class Schedule_Screen extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                Context context = getApplicationContext();
+                BlinkyManager blinky1 = new BlinkyManager(context);
+                blinky1.SendVibrate(true);
                 //send signal to watch to vibrate the watch...
                 /*
                 what we can do, is send a signal to the watch to vibrate, and have the watch
