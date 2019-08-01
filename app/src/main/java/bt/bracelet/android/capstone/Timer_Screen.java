@@ -11,13 +11,16 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.concurrent.TimeUnit;
 
 import no.nordicsemi.android.blinky.R;
+import no.nordicsemi.android.blinky.adapter.DiscoveredBluetoothDevice;
 import no.nordicsemi.android.blinky.profile.BlinkyManager;
+import no.nordicsemi.android.blinky.viewmodels.BlinkyViewModel;
 
 public class Timer_Screen extends AppCompatActivity {
 
@@ -38,6 +41,10 @@ public class Timer_Screen extends AppCompatActivity {
     private FloatingActionButton settingsButton;
     private BlinkyManager blinky1;
 
+    ////////ADDED FOR BT - JUST TYRING
+    public static final String EXTRA_DEVICE = "no.nordicsemi.android.blinky.EXTRA_DEVICE";
+    private BlinkyViewModel blinkyViewModel;
+
     //global time for the reset.
     private int hours;
     private int seconds;
@@ -51,6 +58,14 @@ public class Timer_Screen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timer__screen);
+
+        ////////JUST TYRING
+        final Intent btIntent = getIntent();
+        final DiscoveredBluetoothDevice device = btIntent.getParcelableExtra(EXTRA_DEVICE);
+        blinkyViewModel = ViewModelProviders.of(this).get(BlinkyViewModel.class);
+        blinkyViewModel.connect(device);
+
+
 
 
         countdown = findViewById(R.id.text_view_countdown);
