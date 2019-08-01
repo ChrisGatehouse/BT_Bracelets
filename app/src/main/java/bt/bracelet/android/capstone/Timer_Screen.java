@@ -36,12 +36,15 @@ public class Timer_Screen extends AppCompatActivity {
     private NumberPicker secondPicker;
     private TextView textView;
     private FloatingActionButton settingsButton;
+    private BlinkyManager blinky1;
 
     //global time for the reset.
     private int hours;
     private int seconds;
     private int minutes;
     private String timeLeftText;
+
+    private Context context;
 
 
     @Override
@@ -156,13 +159,16 @@ public class Timer_Screen extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                //send signal to watch to vibrate the watch...
-                /*
-                what we can do, is send a signal to the watch to vibrate, and have the watch
-                vibrate until button is reclicked... (much like the start->cancel->back to start functionality.
-                on ping, set a bool annoyChild = true and change the text of the button to like.."stop ping"
-                on button press again, check the bool, flip it, and send a signal back to the watch to stop vibrating
-                and reset the text on the button
+                 //send signal to watch to vibrate the watch...
+                 context = getApplicationContext();
+                 blinky1 = new BlinkyManager(context);
+                 blinky1.SendVibrate(true);
+                 /*
+                    what we can do, is send a signal to the watch to vibrate, and have the watch
+                    vibrate until button is reclicked... (much like the start->cancel->back to start functionality.
+                    on ping, set a bool annoyChild = true and change the text of the button to like.."stop ping"
+                    on button press again, check the bool, flip it, and send a signal back to the watch to stop vibrating
+                    and reset the text on the button
                  */
             }
         });
@@ -233,8 +239,8 @@ public class Timer_Screen extends AppCompatActivity {
             }
         }.start();
         int seconds_left = (int) TimeUnit.MILLISECONDS.toSeconds(timeLeftInMilliseconds);
-        Context context = getApplicationContext();
-        BlinkyManager blinky1 = new BlinkyManager(context);
+        context = getApplicationContext();
+        blinky1 = new BlinkyManager(context);
         blinky1.SendTimer(seconds_left);
         startButton.setText("cancel");
         timerRunning = true;
@@ -253,6 +259,11 @@ public class Timer_Screen extends AppCompatActivity {
         minutePicker.setValue(0);
         secondPicker.setValue(0);
         timerRunning = false;
+
+        // added for stop timer from blinky manager
+        context = getApplicationContext();
+        blinky1 = new BlinkyManager(context);
+        blinky1.SendTimer(0);
 
         //set visibility of scroll and countdown timer
         textView.setVisibility(View.VISIBLE);
@@ -302,7 +313,8 @@ public class Timer_Screen extends AppCompatActivity {
 
     public void onreset(){
         //cancel currently running timer
-        countDownTimer.cancel();
+        if(countDownTimer != null)
+            countDownTimer.cancel();
 
         //output how long timer will be set to
         if(timerRunning) {
