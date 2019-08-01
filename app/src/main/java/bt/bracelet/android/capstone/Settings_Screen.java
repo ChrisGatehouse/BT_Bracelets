@@ -136,12 +136,6 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
                 B=progress;
             //Build and show the new color
             ShowColor.setBackgroundColor(Color.argb(A, red,G,B));
-            //show the color value
-            //String.format("%02x", red) +String.format("%02x", G)+String.format("%02x", B));
-            //ShowColor.setText("0x"+String.format("%02x", A)+String.format("%02x", red)
-            //        +String.format("%02x", G)+String.format("%02x", B));
-            //some math so text shows (needs improvement for greys)
-            //ShowColor.setTextColor(Color.argb(0xff,255-red,255-G,255-B));
             Context context = getApplicationContext();
             BlinkyManager blinky1 = new BlinkyManager(context);
             blinky1.SendColor(1,2,3);
@@ -153,35 +147,5 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
         public void onStopTrackingTouch(SeekBar seekBar) {
             //Only required due to implements
         }
-
-/*
-        colorButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //search the group for the ID of the button checked
-                selectedColor = colors.getCheckedRadioButtonId();
-                //find the button via the ID returned
-                colorOption.setChecked(false);
-                colorOption = findViewById(selectedColor);
-                colorOption.setChecked(true);
-                editor = preferences.edit();
-                editor.putInt("color", selectedColor);
-                editor.apply();
-                editor.commit();
-
-                //set the color of the watch LED's here to specified color
-            }
-        });
-
-        logout = findViewById(R.id.logout);
-        logout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //logic to log the user out...
-                //should preserve the apps current state.
-            }
-        });
-*/
-
 }
 

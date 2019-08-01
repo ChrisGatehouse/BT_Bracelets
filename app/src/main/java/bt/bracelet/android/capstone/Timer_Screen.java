@@ -1,6 +1,7 @@
 package bt.bracelet.android.capstone;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -16,6 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.concurrent.TimeUnit;
 
 import no.nordicsemi.android.blinky.R;
+import no.nordicsemi.android.blinky.profile.BlinkyManager;
 
 public class Timer_Screen extends AppCompatActivity {
 
@@ -230,7 +232,10 @@ public class Timer_Screen extends AppCompatActivity {
 
             }
         }.start();
-
+        int seconds_left = (int) TimeUnit.MILLISECONDS.toSeconds(timeLeftInMilliseconds);
+        Context context = getApplicationContext();
+        BlinkyManager blinky1 = new BlinkyManager(context);
+        blinky1.SendTimer(seconds_left);
         startButton.setText("cancel");
         timerRunning = true;
     }
