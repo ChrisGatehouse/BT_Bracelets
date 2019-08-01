@@ -34,7 +34,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         createNotificationChannel(context);
         sendNotification(context);
-        
+
         BlinkyManager blinky1 = new BlinkyManager(context);
         blinky1.SendVibrate(true);
 
