@@ -593,6 +593,10 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
                 //disconnect();
                 APP_ERROR_CHECK(err_code);
             }
+            if (button_action == BSP_BUTTON_ACTION_PUSH)
+            {
+                vibrate_flag = 1;
+            }
 
             break;
         case ADVERTISING_BUTTON:
@@ -995,8 +999,10 @@ int main(void)
         if (vibrate_flag) {
             vibrate_flag = 0;
             nrf_gpio_pin_write(VIBRATE_PIN, 1);
+            bsp_board_led_on(BSP_BOARD_LED_3);
             nrf_delay_ms(1000);
             nrf_gpio_pin_write(VIBRATE_PIN, 0);
+            bsp_board_led_off(BSP_BOARD_LED_3);
         }
 
         if (timeout > 0) {
