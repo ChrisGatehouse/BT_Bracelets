@@ -109,12 +109,16 @@ struct ws2812 leds;
 DECLARE_TX_BUFFER(tx_buffer, NLEDS);
 DECLARE_COLOR_BUFFER(colors, NLEDS);
 uint32_t timeout = 0;
+uint32_t color = 0x00FF0000;
+int vibrate_flag = 0;
 
 // Our code
 #define MAIN_LED                        NRF_GPIO_PIN_MAP(1,10)                  // Connected to P1.10 BLUE
 #define SECOND_LED                      NRF_GPIO_PIN_MAP(1,11)                  // Connected to P1.11 BLUE
 #define THIRD_LED                       NRF_GPIO_PIN_MAP(1,12)                  // Connected to P1.12
 #define SPI_PIN                         NRF_GPIO_PIN_MAP(1,14)
+#define VIBRATE_PIN                     NRF_GPIO_PIN_MAP(1,13)
+
 //#define ADVERTISING_BUTTON              2                                       // Button to start advertising
 
 BLE_BRACELET_DEF(m_bracelet);                                                             /**< LED Button Service instance. */
@@ -310,6 +314,35 @@ static void led_write_handler(uint16_t conn_handle, ble_bracelet_t * p_bracelet,
     }
 }
 
+/**@brief Function for handling write events to the Color characteristic.
+ *
+ * @param[in] p_bracelet     Instance of service to which the write applies.
+ * @param[in] led_state Written/desired color of the LEDs.
+ */
+static void color_write_handler(uint16_t conn_handle, ble_bracelet_t * p_bracelet, uint32_t new_color)
+{
+    color = new_color;
+}
+
+/**@brief Function for handling write events to the Vibrate characteristic.
+ *
+ * @param[in] p_bracelet    Instance of service to which the write applies.
+ * @param[in] new_state Written state. Possibly unused?
+ */
+static void vibrate_write_handler(uint16_t conn_handle, ble_bracelet_t * p_bracelet, uint8_t new_state)
+{
+    vibrate_flag = 1;
+}
+
+/**@brief Function for handling write events to the Timer characteristic.
+ *
+ * @param[in] p_bracelet    Instance of service to which the write applies.
+ * @param[in] time  Written/desired time for the countdown.
+ */
+static void timer_write_handler(uint16_t conn_handle, ble_bracelet_t * p_bracelet, uint32_t new_time)
+{
+    timeout = new_time * 1000;
+}
 
 void blinksomelights()
 {
@@ -341,6 +374,9 @@ static void services_init(void)
 
     // Initialize service.
     init.led_write_handler = led_write_handler;
+    init.color_write_handler = color_write_handler;
+    init.vibrate_write_handler = vibrate_write_handler;
+    init.timer_write_handler = timer_write_handler;
 
     err_code = ble_bracelet_init(&m_bracelet, &init);
     APP_ERROR_CHECK(err_code);
@@ -873,6 +909,8 @@ static void single_shot_timer_handler(void * p_context)
   } 
 
   ws2812_spi_show(&leds);
+
+  timeout = 0;
 }
 
 /**@brief Create timers.
@@ -918,6 +956,12 @@ static void leds_init(void)
     nrf_gpio_pin_write(SECOND_LED, 1);
 }
 
+static void vibrate_init(void)
+{
+    nrf_gpio_cfg_output(VIBRATE_PIN);
+    nrf_gpio_pin_write(VIBRATE_PIN, 0);
+}
+
 /**@brief Function for application main entry.
  */
 int main(void)
@@ -925,6 +969,7 @@ int main(void)
     // Initialize.
     log_init();
     leds_init();
+    vibrate_init();
     timers_init();
     buttons_init();
     power_management_init();
@@ -939,17 +984,25 @@ int main(void)
     led_color_init(255, 0, 0);
     app_timer_init();
     create_timer();
-    timeout = 5000;
-    start_timer(timeout);
-    
+
     // Start execution.
-    NRF_LOG_INFO("Blinky example started.");
+    NRF_LOG_INFO("App started.");
    // advertising_start();
 
     // Enter main loop.
     for (;;)
     {
-        idle_state_handle();
+        if (vibrate_flag) {
+            vibrate_flag = 0;
+            nrf_gpio_pin_write(VIBRATE_PIN, 1);
+            nrf_delay_ms(1000);
+            nrf_gpio_pin_write(VIBRATE_PIN, 0);
+        }
+
+        if (timeout > 0) {
+            start_timer(timeout);
+        }
+        //idle_state_handle();
     }
 }
 
