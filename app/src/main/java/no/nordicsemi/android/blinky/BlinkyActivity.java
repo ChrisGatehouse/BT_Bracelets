@@ -28,13 +28,18 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import bt.bracelet.android.capstone.Settings_Screen;
+import bt.bracelet.android.capstone.Timer_Screen;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -42,13 +47,17 @@ import no.nordicsemi.android.blinky.adapter.DiscoveredBluetoothDevice;
 import no.nordicsemi.android.blinky.viewmodels.BlinkyViewModel;
 
 @SuppressWarnings("ConstantConditions")
-public class BlinkyActivity extends AppCompatActivity {
+public class BlinkyActivity extends AppCompatActivity implements Parcelable {
 	public static final String EXTRA_DEVICE = "no.nordicsemi.android.blinky.EXTRA_DEVICE";
 
-	private BlinkyViewModel mViewModel;
+	public BlinkyViewModel mViewModel;
 
 	@BindView(R.id.led_switch) Switch mLed;
 	@BindView(R.id.button_state) TextView mButtonState;
+	private Button controlBraceletButton;
+
+	//@BindView(R.id.Control_Bracelet) Button button;
+
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -104,6 +113,18 @@ public class BlinkyActivity extends AppCompatActivity {
 		mViewModel.getButtonState().observe(this,
 				pressed -> mButtonState.setText(pressed ?
 						R.string.button_pressed : R.string.button_released));
+
+		controlBraceletButton = findViewById(R.id.Control_Bracelet);
+
+		// listen for a click on the start button to start or pause the timer
+		controlBraceletButton.setOnClickListener(view -> {
+			Intent intent1 = new Intent(this, Timer_Screen.class);
+			//TODO: THIS NEEDS TO CREATE A PARCEL THAT I BUNDLE AND SEND TO THE NEXT SCREEN ON START ACTIVITY!!!!!!!!
+			//Bundle b = new Bundle(Blink);
+			intent1.putExtra(EXTRA_DEVICE, device);
+			//intent1.putExtra(,mViewModel.mBlinkyManager);
+			startActivity(intent1);
+		});
 	}
 
 	@OnClick(R.id.action_clear_cache)
@@ -118,4 +139,40 @@ public class BlinkyActivity extends AppCompatActivity {
 			mButtonState.setText(R.string.button_unknown);
 		}
 	}
+
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeParcelable(this.mViewModel, flags);
+		dest.writeParcelable((Parcelable) this.mLed, flags);
+		dest.writeParcelable((Parcelable) this.mButtonState, flags);
+		dest.writeParcelable((Parcelable) this.controlBraceletButton, flags);
+	}
+
+	public BlinkyActivity() {
+	}
+
+	protected BlinkyActivity(Parcel in) {
+		this.mViewModel = in.readParcelable(BlinkyViewModel.class.getClassLoader());
+		this.mLed = in.readParcelable(Switch.class.getClassLoader());
+		this.mButtonState = in.readParcelable(TextView.class.getClassLoader());
+		this.controlBraceletButton = in.readParcelable(Button.class.getClassLoader());
+	}
+
+	public static final Parcelable.Creator<BlinkyActivity> CREATOR = new Parcelable.Creator<BlinkyActivity>() {
+		@Override
+		public BlinkyActivity createFromParcel(Parcel source) {
+			return new BlinkyActivity(source);
+		}
+
+		@Override
+		public BlinkyActivity[] newArray(int size) {
+			return new BlinkyActivity[size];
+		}
+	};
 }

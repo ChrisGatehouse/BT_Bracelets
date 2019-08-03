@@ -12,13 +12,17 @@ import android.widget.Button;
 import android.widget.TimePicker;
 import android.widget.ToggleButton;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import no.nordicsemi.android.blinky.R;
+import no.nordicsemi.android.blinky.adapter.DiscoveredBluetoothDevice;
 import no.nordicsemi.android.blinky.profile.BlinkyManager;
+import no.nordicsemi.android.blinky.viewmodels.BlinkyViewModel;
 
 public class Schedule_Screen extends AppCompatActivity {
     private FloatingActionButton settingButton;
@@ -42,6 +46,11 @@ public class Schedule_Screen extends AppCompatActivity {
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
     private static final String preferenceFile = "bt.bracelet.android.capstone";
+
+
+    ////////JUST TRYING
+    public static final String EXTRA_DEVICE = "no.nordicsemi.android.blinky.EXTRA_DEVICE";
+    private BlinkyViewModel blinkyViewModel;
 
 
     // Method to set alarm
@@ -89,6 +98,15 @@ public class Schedule_Screen extends AppCompatActivity {
         day6Button = findViewById(R.id.day6);
         timerButton = findViewById(R.id.TimerButton);
         time = findViewById(R.id.TimePicker);
+
+
+        /////////JUST TRYING
+        final Intent btIntent = getIntent();
+        final DiscoveredBluetoothDevice device = btIntent.getParcelableExtra(EXTRA_DEVICE);
+        blinkyViewModel = ViewModelProviders.of(this).get(BlinkyViewModel.class);
+        if(device != null) {
+            blinkyViewModel.connect(device);
+        }
 
 
         //get all stored preferences

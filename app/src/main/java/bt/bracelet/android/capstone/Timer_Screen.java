@@ -1,26 +1,37 @@
 package bt.bracelet.android.capstone;
 
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModelProviders;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.concurrent.TimeUnit;
 
+import no.nordicsemi.android.blinky.BlinkyActivity;
 import no.nordicsemi.android.blinky.R;
+import no.nordicsemi.android.blinky.adapter.DiscoveredBluetoothDevice;
 import no.nordicsemi.android.blinky.profile.BlinkyManager;
+import no.nordicsemi.android.blinky.viewmodels.BlinkyViewModel;
 
-public class Timer_Screen extends AppCompatActivity {
+public class Timer_Screen extends AppCompatActivity implements Parcelable {
 
+    public BlinkyManager blinky1;
     private TextView countdown;
     private Button startButton;
     private Button resetButton;
@@ -36,7 +47,13 @@ public class Timer_Screen extends AppCompatActivity {
     private NumberPicker secondPicker;
     private TextView textView;
     private FloatingActionButton settingsButton;
-    private BlinkyManager blinky1;
+    //public BlinkyManager blinky1;
+    // Flag that holds the on off state of the ping/vibrate. On is true, Off is False
+    private final MutableLiveData<Boolean> mVIBRATEState = new MutableLiveData<>();
+    ////////ADDED FOR BT - JUST TYRING
+    public static final String EXTRA_DEVICE = "no.nordicsemi.android.blinky.EXTRA_DEVICE";
+    //private BlinkyViewModel blinkyViewModel;
+    public BluetoothDevice mDevice;
 
     //global time for the reset.
     private int hours;
@@ -51,6 +68,22 @@ public class Timer_Screen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timer__screen);
+
+        Intent btIntent = getIntent();
+
+
+        ////////JUST TYRING
+        //final Intent btIntent = getIntent();
+        DiscoveredBluetoothDevice device = btIntent.getParcelableExtra(EXTRA_DEVICE);
+        //BlinkyActivity activity = new BlinkyActivity();
+        //BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        //BluetoothDevice devicel = new BluetoothDevice(this);
+        //blinkyViewModel = ViewModelProviders.of(this).get(BlinkyViewModel.class);
+        //blinkyViewModel.mBlinkyManager.setGattCallbacks(this.blinkyViewModel);
+        mDevice = device.getDevice();
+        //if(device != null) {
+         //   blinkyViewModel.connect(device);
+       // }
 
 
         countdown = findViewById(R.id.text_view_countdown);
@@ -158,11 +191,34 @@ public class Timer_Screen extends AppCompatActivity {
         ping.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                 Log.d("ping has been pressed", "ping has been pressed");
                  //send signal to watch to vibrate the watch...
-                 context = getApplicationContext();
-                 blinky1 = new BlinkyManager(context);
+                 //context = getApplicationContext();
+                 //blinky1 = new BlinkyManager(context);
+                 //mDevice = device.getDevice();
+                 //blinky1.send(true);
                  blinky1.SendVibrate(true);
+                // blinkyViewModel.disconnect();
+                 //blinkyViewModel.mBlinkyManager.connect(mDevice);
+                 //blinkyViewModel.reconnect();
+                 //blinkyViewModel.toggleLED(true);
+                 //blinkyViewModel.mBlinkyManager.send(true);
+                 //blinkyViewModel.mBlinkyManager.SendVibrate(true);
+                 //blinky1.setGattCallbacks(this.onClick(v));
+                 //startActivity(btIntent);
+                 //blinky1.send(true);
+                 //blinky1.SendVibrate(true);
+                 //mVIBRATEState.postValue(true);
+                 //mVIBRATEState.setValue(true);
+                 //blink1.writeChar
+
+                //context = getApplicationContext();
+               // activity.mViewModel = new BlinkyViewModel(context);
+               // activity.mViewModel.mBlinkyManager = new BlinkyManager(context);
+                //activity.mViewModel.mBlinkyManager.send(true);
+
+
+
                  /*
                     what we can do, is send a signal to the watch to vibrate, and have the watch
                     vibrate until button is reclicked... (much like the start->cancel->back to start functionality.
@@ -323,4 +379,81 @@ public class Timer_Screen extends AppCompatActivity {
         }
         timerRunning=false;
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable((Parcelable) this.blinky1, flags);
+        dest.writeParcelable((Parcelable) this.countdown, flags);
+        dest.writeParcelable((Parcelable) this.startButton, flags);
+        dest.writeParcelable((Parcelable) this.resetButton, flags);
+        dest.writeParcelable((Parcelable) this.reserved1Button, flags);
+        dest.writeParcelable((Parcelable) this.schedule, flags);
+        dest.writeParcelable((Parcelable) this.ping, flags);
+        dest.writeParcelable((Parcelable) this.countDownTimer, flags);
+        dest.writeLong(this.timeLeftInMilliseconds);
+        dest.writeByte(this.timerRunning ? (byte) 1 : (byte) 0);
+        dest.writeLong(this.timeLeft);
+        dest.writeParcelable((Parcelable) this.hourPicker, flags);
+        dest.writeParcelable((Parcelable) this.minutePicker, flags);
+        dest.writeParcelable((Parcelable) this.secondPicker, flags);
+        dest.writeParcelable((Parcelable) this.textView, flags);
+        dest.writeParcelable((Parcelable) this.settingsButton, flags);
+        dest.writeParcelable((Parcelable) this.mVIBRATEState, flags);
+        dest.writeParcelable(this.mDevice, flags);
+        dest.writeInt(this.hours);
+        dest.writeInt(this.seconds);
+        dest.writeInt(this.minutes);
+        dest.writeString(this.timeLeftText);
+        dest.writeParcelable((Parcelable) this.context, flags);
+    }
+
+    public Timer_Screen() {
+    }
+
+    /**
+     * @param in
+     */
+    protected Timer_Screen(Parcel in) {
+        this.blinky1 = new BlinkyManager(in.readParcelable(BlinkyManager.class.getClassLoader()));
+        this.countdown = in.readParcelable(TextView.class.getClassLoader());
+        this.startButton = in.readParcelable(Button.class.getClassLoader());
+        this.resetButton = in.readParcelable(Button.class.getClassLoader());
+        this.reserved1Button = in.readParcelable(Button.class.getClassLoader());
+        this.schedule = in.readParcelable(Button.class.getClassLoader());
+        this.ping = in.readParcelable(Button.class.getClassLoader());
+        this.countDownTimer = in.readParcelable(CountDownTimer.class.getClassLoader());
+        this.timeLeftInMilliseconds = in.readLong();
+        this.timerRunning = in.readByte() != 0;
+        this.timeLeft = in.readLong();
+        this.hourPicker = in.readParcelable(NumberPicker.class.getClassLoader());
+        this.minutePicker = in.readParcelable(NumberPicker.class.getClassLoader());
+        this.secondPicker = in.readParcelable(NumberPicker.class.getClassLoader());
+        this.textView = in.readParcelable(TextView.class.getClassLoader());
+        this.settingsButton = in.readParcelable(FloatingActionButton.class.getClassLoader());
+        //this.mVIBRATEState = in.readParcelable(MutableLiveData<Boolean>.class.getClassLoader());
+        this.mDevice = in.readParcelable(BluetoothDevice.class.getClassLoader());
+        this.hours = in.readInt();
+        this.seconds = in.readInt();
+        this.minutes = in.readInt();
+        this.timeLeftText = in.readString();
+        this.context = in.readParcelable(Context.class.getClassLoader());
+    }
+
+    public static final Parcelable.Creator<Timer_Screen> CREATOR = new Parcelable.Creator<Timer_Screen>() {
+        @Override
+        public Timer_Screen createFromParcel(Parcel source) {
+            return new Timer_Screen(source);
+        }
+
+        @Override
+        public Timer_Screen[] newArray(int size) {
+            return new Timer_Screen[size];
+        }
+    };
 }

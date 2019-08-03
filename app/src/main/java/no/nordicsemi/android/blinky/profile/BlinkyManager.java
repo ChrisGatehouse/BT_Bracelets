@@ -27,6 +27,8 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -46,27 +48,27 @@ import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.log.LogSession;
 import no.nordicsemi.android.log.Logger;
 
-public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
+public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> implements Parcelable {
 
 	/** Nordic Blinky Service UUID. */
-	public final static UUID LBS_UUID_SERVICE = UUID.fromString("00001523-1212-efde-1523-785feabcd123");
+	public static UUID LBS_UUID_SERVICE = UUID.fromString("00001523-1212-efde-1523-785feabcd123");
 	/** BUTTON characteristic UUID. */
-	private final static UUID LBS_UUID_BUTTON_CHAR = UUID.fromString("00001524-1212-efde-1523-785feabcd123");
+	private static UUID LBS_UUID_BUTTON_CHAR = UUID.fromString("00001524-1212-efde-1523-785feabcd123");
 	/** LED characteristic UUID. */
-	private final static UUID LBS_UUID_LED_CHAR = UUID.fromString("00001525-1212-efde-1523-785feabcd123");
+	private static UUID LBS_UUID_LED_CHAR = UUID.fromString("00001525-1212-efde-1523-785feabcd123");
 	/** Color characteristic UUID. */
-	private final static UUID COLOR_UUID = UUID.fromString("00001526-1212-efde-1523-785feabcd123");
+	private static UUID COLOR_UUID = UUID.fromString("00001526-1212-efde-1523-785feabcd123");
 	/** Vibrate characteristic UUID. */
-	private final static UUID VIBRATE_UUID = UUID.fromString("00001527-1212-efde-1523-785feabcd123");
+	private static UUID VIBRATE_UUID = UUID.fromString("00001527-1212-efde-1523-785feabcd123");
 	/** Timercharacteristic UUID. */
-	private final static UUID TIMER_UUID = UUID.fromString("00001528-1212-efde-1523-785feabcd123");
+	private static UUID TIMER_UUID = UUID.fromString("00001528-1212-efde-1523-785feabcd123");
 
 	private BluetoothGattCharacteristic mButtonCharacteristic, mLedCharacteristic, mColorCharacteristic, mVibrateCharacteristic, mTimerCharacteristic;
 	private LogSession mLogSession;
 	private boolean mSupported;
 	private boolean mLedOn;
 
-	public BlinkyManager(@NonNull final Context context) {
+	public BlinkyManager(@NonNull Context context) {
 		super(context);
 	}
 
@@ -81,12 +83,12 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 	 * Sets the log session to be used for low level logging.
 	 * @param session the session, or null, if nRF Logger is not installed.
 	 */
-	public void setLogger(@Nullable final LogSession session) {
+	public void setLogger(@Nullable LogSession session) {
 		this.mLogSession = session;
 	}
 
 	@Override
-	public void log(final int priority, @NonNull final String message) {
+	public void log(int priority, @NonNull String message) {
 		// The priority is a Log.X constant, while the Logger accepts it's log levels.
 		Logger.log(mLogSession, LogContract.Log.Level.fromPriority(priority), message);
 	}
@@ -105,7 +107,7 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 	 * Otherwise, the {@link BlinkyButtonDataCallback#onInvalidDataReceived(BluetoothDevice, Data)}
 	 * will be called with the data received.
 	 */
-	private	final BlinkyButtonDataCallback mButtonCallback = new BlinkyButtonDataCallback() {
+	private BlinkyButtonDataCallback mButtonCallback = new BlinkyButtonDataCallback() {
 		@Override
 		public void onButtonStateChanged(@NonNull final BluetoothDevice device,
 										 final boolean pressed) {
@@ -131,12 +133,13 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 	 * {@link BlinkyLedDataCallback#onInvalidDataReceived(BluetoothDevice, Data)} will be
 	 * called.
 	 */
-	private final BlinkyLedDataCallback mLedCallback = new BlinkyLedDataCallback() {
+	private BlinkyLedDataCallback mLedCallback = new BlinkyLedDataCallback() {
 		@Override
 		public void onLedStateChanged(@NonNull final BluetoothDevice device,
 									  final boolean on) {
 			mLedOn = on;
 			log(LogContract.Log.Level.APPLICATION, "LED " + (on ? "ON" : "OFF"));
+			Log.d("ledcallback", "Callback from led");
 			mCallbacks.onLedStateChanged(device, on);
 		}
 
@@ -151,11 +154,11 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 	/**
 	 * BluetoothGatt callbacks object.
 	 */
-	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
+	private BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 		@Override
 		protected void initialize() {
 			setNotificationCallback(mButtonCharacteristic).with(mButtonCallback);
-			//readCharacteristic(mVibrateCharacteristic).with(mVibrateCallback).enqueue();
+			readCharacteristic(mVibrateCharacteristic).with(mVibrateCallback).enqueue();
 			readCharacteristic(mLedCharacteristic).with(mLedCallback).enqueue();
 			readCharacteristic(mButtonCharacteristic).with(mButtonCallback).enqueue();
 			enableNotifications(mButtonCharacteristic).enqueue();
@@ -163,8 +166,13 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 
 		@Override
 		public boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
-			final BluetoothGattService service = gatt.getService(LBS_UUID_SERVICE);
+			 BluetoothGattService service = gatt.getService(LBS_UUID_SERVICE);
+			 //BluetoothGattService service2 = gatt.getService(VIBRATE_UUID);
+
+			 //mVibrateCharacteristic = service2.getCharacteristic(VIBRATE_UUID);
+
 			if (service != null) {
+
 				mButtonCharacteristic = service.getCharacteristic(LBS_UUID_BUTTON_CHAR);
 				mLedCharacteristic = service.getCharacteristic(LBS_UUID_LED_CHAR);
 				mVibrateCharacteristic = service.getCharacteristic(VIBRATE_UUID);
@@ -179,7 +187,17 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 				writeRequest = (rxProperties & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0;
 			}
 
-			mSupported = mButtonCharacteristic != null && mLedCharacteristic != null && writeRequest;
+			boolean writeRequest2 = false;
+			if (mVibrateCharacteristic != null) {
+				final int rxProperties2 = mVibrateCharacteristic.getProperties();
+				writeRequest2 = (rxProperties2 & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0;
+			}
+
+			service.addCharacteristic(mVibrateCharacteristic);
+			service.addCharacteristic(mColorCharacteristic);
+			service.addCharacteristic(mTimerCharacteristic);
+
+			mSupported = mButtonCharacteristic != null && mLedCharacteristic != null && mVibrateCharacteristic != null && writeRequest && writeRequest2;
 			return mSupported;
 		}
 
@@ -228,8 +246,21 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 	/// sends a vibrate on/off signal to the micro-controller
 	public void SendVibrate(boolean on)
 	{
+		//byte turningOn = 0x01;
+		//byte turningOff = 0x00;
+		byte[] turningOn = new byte[1];
+		turningOn[0] = 0x01;
+		Log.d("bla", "blabla send vibrate");
 		log(Log.VERBOSE, "Turning vibration " + (on ? "ON" : "OFF") + "...");
-		writeCharacteristic(mVibrateCharacteristic, on ? BlinkyLED.turnOn() : BlinkyLED.turnOff())
+		log(Log.DEBUG, "Turning vibration " + (on ? "ON" : "OFF"));
+		//writeCharacteristic(mVibrateCharacteristic, on ? BlinkyLED.turnOn() : BlinkyLED.turnOff())
+		//		.with(mVibrateCallback).enqueue();
+		log(Log.VERBOSE, "Turning LED " + (on ? "ON" : "OFF") + "...");
+		writeCharacteristic(mLedCharacteristic,BlinkyLED.turnOn())
+				.with(mLedCallback).enqueue();
+
+		send(true);
+		writeCharacteristic(mVibrateCharacteristic, turningOn)
 				.with(mVibrateCallback).enqueue();
 	}
 
@@ -256,13 +287,13 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 	 * {@link BlinkyLedDataCallback#onInvalidDataReceived(BluetoothDevice, Data)} will be
 	 * called.
 	 */
-	private final BlinkyLedDataCallback mVibrateCallback = new BlinkyLedDataCallback() {
+	private BlinkyLedDataCallback mVibrateCallback = new BlinkyLedDataCallback() {
 		@Override
 		public void onLedStateChanged(@NonNull final BluetoothDevice device,
 									  final boolean on) {
-			//mLedOn = on;
+			mLedOn = on;
 			log(LogContract.Log.Level.APPLICATION, "Vibrate toggled");
-			//mCallbacks.onLedStateChanged(device, on);
+			mCallbacks.onLedStateChanged(device, on);
 		}
 
 		@Override
@@ -273,7 +304,7 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 		}
 	};
 
-	private final BlinkyLedDataCallback mColorCharacteristicCallback = new BlinkyLedDataCallback() {
+	private BlinkyLedDataCallback mColorCharacteristicCallback = new BlinkyLedDataCallback() {
 		@Override
 		public void onLedStateChanged(@NonNull final BluetoothDevice device,
 									  final boolean on) {
@@ -288,7 +319,7 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 		}
 	};
 
-	private final BlinkyLedDataCallback mTimerCharacteristicCallback = new BlinkyLedDataCallback() {
+	private BlinkyLedDataCallback mTimerCharacteristicCallback = new BlinkyLedDataCallback() {
 		@Override
 		public void onLedStateChanged(@NonNull final BluetoothDevice device,
 									  final boolean on) {
@@ -304,4 +335,60 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> {
 	};
 
 
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeParcelable(this.mButtonCharacteristic, flags);
+		dest.writeParcelable(this.mLedCharacteristic, flags);
+		dest.writeParcelable(this.mColorCharacteristic, flags);
+		dest.writeParcelable(this.mVibrateCharacteristic, flags);
+		dest.writeParcelable(this.mTimerCharacteristic, flags);
+		dest.writeParcelable((Parcelable) this.mLogSession, flags);
+		dest.writeByte(this.mSupported ? (byte) 1 : (byte) 0);
+		dest.writeByte(this.mLedOn ? (byte) 1 : (byte) 0);
+		dest.writeParcelable((Parcelable) this.mButtonCallback, flags);
+		dest.writeParcelable((Parcelable) this.mLedCallback, flags);
+		dest.writeParcelable((Parcelable) this.mGattCallback, flags);
+		dest.writeParcelable((Parcelable) this.mVibrateCallback, flags);
+		dest.writeParcelable((Parcelable) this.mColorCharacteristicCallback, flags);
+		dest.writeParcelable((Parcelable) this.mTimerCharacteristicCallback, flags);
+	}
+
+	/**
+	 * @param in
+	 */
+	protected BlinkyManager(Parcel in, Context context) {
+
+		super(context);
+		this.mButtonCharacteristic = in.readParcelable(BluetoothGattCharacteristic.class.getClassLoader());
+		this.mLedCharacteristic = in.readParcelable(BluetoothGattCharacteristic.class.getClassLoader());
+		this.mColorCharacteristic = in.readParcelable(BluetoothGattCharacteristic.class.getClassLoader());
+		this.mVibrateCharacteristic = in.readParcelable(BluetoothGattCharacteristic.class.getClassLoader());
+		this.mTimerCharacteristic = in.readParcelable(BluetoothGattCharacteristic.class.getClassLoader());
+		this.mLogSession = in.readParcelable(LogSession.class.getClassLoader());
+		this.mSupported = in.readByte() != 0;
+		this.mLedOn = in.readByte() != 0;
+		this.mButtonCallback = in.readParcelable(BlinkyButtonDataCallback.class.getClassLoader());
+		this.mLedCallback = in.readParcelable(BlinkyLedDataCallback.class.getClassLoader());
+		this.mGattCallback = in.readParcelable(BleManagerGattCallback.class.getClassLoader());
+		this.mVibrateCallback = in.readParcelable(BlinkyLedDataCallback.class.getClassLoader());
+		this.mColorCharacteristicCallback = in.readParcelable(BlinkyLedDataCallback.class.getClassLoader());
+		this.mTimerCharacteristicCallback = in.readParcelable(BlinkyLedDataCallback.class.getClassLoader());
+	}
+
+	public final Parcelable.Creator<BlinkyManager> CREATOR = new Parcelable.Creator<BlinkyManager>() {
+		@Override
+		public BlinkyManager createFromParcel(Parcel source) {
+			return new BlinkyManager(source, getContext());
+		}
+
+		@Override
+		public BlinkyManager[] newArray(int size) {
+			return new BlinkyManager[size];
+		}
+	};
 }

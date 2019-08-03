@@ -27,6 +27,9 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import android.bluetooth.BluetoothDevice;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import androidx.annotation.NonNull;
 
 import no.nordicsemi.android.blinky.R;
@@ -36,9 +39,10 @@ import no.nordicsemi.android.blinky.profile.BlinkyManagerCallbacks;
 import no.nordicsemi.android.log.LogSession;
 import no.nordicsemi.android.log.Logger;
 
-public class BlinkyViewModel extends AndroidViewModel implements BlinkyManagerCallbacks {
-	private final BlinkyManager mBlinkyManager;
-	private BluetoothDevice mDevice;
+public class BlinkyViewModel extends AndroidViewModel implements BlinkyManagerCallbacks, Parcelable {
+	public
+	BlinkyManager mBlinkyManager;
+	public BluetoothDevice mDevice;
 
 	// Connection states Connecting, Connected, Disconnecting, Disconnected etc.
 	private final MutableLiveData<String> mConnectionState = new MutableLiveData<>();
@@ -83,6 +87,7 @@ public class BlinkyViewModel extends AndroidViewModel implements BlinkyManagerCa
 		return mIsSupported;
 	}
 
+
 	public BlinkyViewModel(@NonNull final Application application) {
 		super(application);
 
@@ -90,6 +95,7 @@ public class BlinkyViewModel extends AndroidViewModel implements BlinkyManagerCa
 		mBlinkyManager = new BlinkyManager(getApplication());
 		mBlinkyManager.setGattCallbacks(this);
 	}
+
 
 	/**
 	 * Connect to peripheral.
@@ -122,7 +128,7 @@ public class BlinkyViewModel extends AndroidViewModel implements BlinkyManagerCa
 	/**
 	 * Disconnect from peripheral.
 	 */
-	private void disconnect() {
+	public void disconnect() {
 		mDevice = null;
 		mBlinkyManager.disconnect().enqueue();
 	}
@@ -136,7 +142,7 @@ public class BlinkyViewModel extends AndroidViewModel implements BlinkyManagerCa
 	protected void onCleared() {
 		super.onCleared();
 		if (mBlinkyManager.isConnected()) {
-			disconnect();
+			//disconnect();
 		}
 	}
 
@@ -215,4 +221,47 @@ public class BlinkyViewModel extends AndroidViewModel implements BlinkyManagerCa
 		mConnectionState.postValue(null);
 		mIsSupported.postValue(false);
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeParcelable((Parcelable) this.mBlinkyManager, flags);
+		dest.writeParcelable(this.mDevice, flags);
+		dest.writeParcelable((Parcelable) this.mConnectionState, flags);
+		dest.writeParcelable((Parcelable) this.mIsConnected, flags);
+		dest.writeParcelable((Parcelable) this.mIsSupported, flags);
+		dest.writeParcelable((Parcelable) this.mOnDeviceReady, flags);
+		dest.writeParcelable((Parcelable) this.mLEDState, flags);
+		dest.writeParcelable((Parcelable) this.mButtonState, flags);
+	}
+
+
+	private BlinkyViewModel(Parcel in, Application application) {
+
+		super(application);
+		this.mBlinkyManager = in.readParcelable(BlinkyManager.class.getClassLoader());
+		this.mDevice = in.readParcelable(BluetoothDevice.class.getClassLoader());
+		//this.mConnectionState = in.readParcelable(mConnectionState.class.getClassLoader());
+		//this.mIsConnected = (MutableLiveData<Boolean>) in.readParcelable(mIsConnected);
+		//this.mIsSupported = in.readParcelable(LiveData.class.getClassLoader());
+		//this.mOnDeviceReady = in.readParcelable(MutableLiveData<Void>.class.getClassLoader());
+		//this.mLEDState = in.readParcelable(MutableLiveData<Boolean>.class.getClassLoader());
+		//this.mButtonState = in.readParcelable(MutableLiveData<Boolean>.class.getClassLoader());
+	}
+
+	public final Parcelable.Creator<BlinkyViewModel> CREATOR = new Parcelable.Creator<BlinkyViewModel>() {
+		@Override
+		public BlinkyViewModel createFromParcel(Parcel source) {
+			return new BlinkyViewModel(source, getApplication());
+		}
+
+		@Override
+		public BlinkyViewModel[] newArray(int size) {
+			return new BlinkyViewModel[size];
+		}
+	};
 }
