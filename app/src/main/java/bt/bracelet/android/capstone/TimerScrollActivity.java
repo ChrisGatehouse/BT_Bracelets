@@ -25,10 +25,13 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.widget.NumberPicker;
 import android.widget.TextView;
+
+import java.io.Serializable;
+
 import no.nordicsemi.android.blinky.R;
 
 
-public class TimerScrollActivity extends Activity {
+public class TimerScrollActivity extends Activity implements Serializable {
     NumberPicker hourPicker;
     NumberPicker minutePicker;
     NumberPicker secondPicker;

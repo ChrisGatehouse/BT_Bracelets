@@ -25,10 +25,12 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 
+import java.io.Serializable;
+
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 
-public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener {
+public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, Serializable {
 
     private Button bluetooth;//button that takes user to bluetooth page
     private SwitchCompat switch_2; //currently unused

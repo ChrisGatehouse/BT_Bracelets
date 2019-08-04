@@ -22,6 +22,8 @@
 
 package no.nordicsemi.android.blinky.profile;
 
+import java.io.Serializable;
+
 import no.nordicsemi.android.ble.BleManagerCallbacks;
 import no.nordicsemi.android.blinky.profile.callback.BlinkyButtonCallback;
 import no.nordicsemi.android.blinky.profile.callback.BlinkyLedCallback;

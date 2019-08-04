@@ -34,6 +34,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.UUID;
@@ -48,7 +49,7 @@ import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.log.LogSession;
 import no.nordicsemi.android.log.Logger;
 
-public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> implements Parcelable {
+public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> implements Serializable {
 
 	/** Nordic Blinky Service UUID. */
 	public static UUID LBS_UUID_SERVICE = UUID.fromString("00001523-1212-efde-1523-785feabcd123");
@@ -62,6 +63,8 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> implements
 	private static UUID VIBRATE_UUID = UUID.fromString("00001527-1212-efde-1523-785feabcd123");
 	/** Timercharacteristic UUID. */
 	private static UUID TIMER_UUID = UUID.fromString("00001528-1212-efde-1523-785feabcd123");
+
+	public static Context myContext;
 
 	private BluetoothGattCharacteristic mButtonCharacteristic, mLedCharacteristic, mColorCharacteristic, mVibrateCharacteristic, mTimerCharacteristic;
 	private LogSession mLogSession;
@@ -334,12 +337,13 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> implements
 		}
 	};
 
-
+/*
 	@Override
 	public int describeContents() {
 		return 0;
 	}
-
+*/
+	/*
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeParcelable(this.mButtonCharacteristic, flags);
@@ -350,17 +354,16 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> implements
 		dest.writeParcelable((Parcelable) this.mLogSession, flags);
 		dest.writeByte(this.mSupported ? (byte) 1 : (byte) 0);
 		dest.writeByte(this.mLedOn ? (byte) 1 : (byte) 0);
-		dest.writeParcelable((Parcelable) this.mButtonCallback, flags);
-		dest.writeParcelable((Parcelable) this.mLedCallback, flags);
-		dest.writeParcelable((Parcelable) this.mGattCallback, flags);
-		dest.writeParcelable((Parcelable) this.mVibrateCallback, flags);
-		dest.writeParcelable((Parcelable) this.mColorCharacteristicCallback, flags);
-		dest.writeParcelable((Parcelable) this.mTimerCharacteristicCallback, flags);
+		//dest.writeParcelable((Parcelable) this.mButtonCallback, flags);
+		//dest.writeParcelable((Parcelable) this.mLedCallback, flags);
+		//dest.writeParcelable((Parcelable) this.mGattCallback, flags);
+		//dest.writeParcelable((Parcelable) this.mVibrateCallback, flags);
+		//dest.writeParcelable((Parcelable) this.mColorCharacteristicCallback, flags);
+		//dest.writeParcelable((Parcelable) this.mTimerCharacteristicCallback, flags);
 	}
+*/
 
-	/**
-	 * @param in
-	 */
+/*
 	protected BlinkyManager(Parcel in, Context context) {
 
 		super(context);
@@ -379,11 +382,33 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> implements
 		this.mColorCharacteristicCallback = in.readParcelable(BlinkyLedDataCallback.class.getClassLoader());
 		this.mTimerCharacteristicCallback = in.readParcelable(BlinkyLedDataCallback.class.getClassLoader());
 	}
+*/
 
-	public final Parcelable.Creator<BlinkyManager> CREATOR = new Parcelable.Creator<BlinkyManager>() {
+
+/*
+	protected BlinkyManager(Parcel in) {
+		//this(getContext());
+
+
+		this.mButtonCharacteristic = in.readParcelable(BluetoothGattCharacteristic.class.getClassLoader());
+		this.mLedCharacteristic = in.readParcelable(BluetoothGattCharacteristic.class.getClassLoader());
+		this.mColorCharacteristic = in.readParcelable(BluetoothGattCharacteristic.class.getClassLoader());
+		this.mVibrateCharacteristic = in.readParcelable(BluetoothGattCharacteristic.class.getClassLoader());
+		this.mTimerCharacteristic = in.readParcelable(BluetoothGattCharacteristic.class.getClassLoader());
+		this.mLogSession = in.readParcelable(LogSession.class.getClassLoader());
+		this.mSupported = in.readByte() != 0;
+		this.mLedOn = in.readByte() != 0;
+		this.mButtonCallback = in.readParcelable(BlinkyButtonDataCallback.class.getClassLoader());
+		this.mLedCallback = in.readParcelable(BlinkyLedDataCallback.class.getClassLoader());
+		this.mGattCallback = in.readParcelable(BleManagerGattCallback.class.getClassLoader());
+		this.mVibrateCallback = in.readParcelable(BlinkyLedDataCallback.class.getClassLoader());
+		this.mColorCharacteristicCallback = in.readParcelable(BlinkyLedDataCallback.class.getClassLoader());
+		this.mTimerCharacteristicCallback = in.readParcelable(BlinkyLedDataCallback.class.getClassLoader());
+	}
+	public static final Parcelable.Creator<BlinkyManager> CREATOR = new Parcelable.Creator<BlinkyManager>() {
 		@Override
 		public BlinkyManager createFromParcel(Parcel source) {
-			return new BlinkyManager(source, getContext());
+			return new BlinkyManager(source);
 		}
 
 		@Override
@@ -391,4 +416,5 @@ public class BlinkyManager extends BleManager<BlinkyManagerCallbacks> implements
 			return new BlinkyManager[size];
 		}
 	};
+	*/
 }

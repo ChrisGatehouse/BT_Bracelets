@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -24,7 +25,7 @@ import no.nordicsemi.android.blinky.adapter.DiscoveredBluetoothDevice;
 import no.nordicsemi.android.blinky.profile.BlinkyManager;
 import no.nordicsemi.android.blinky.viewmodels.BlinkyViewModel;
 
-public class Schedule_Screen extends AppCompatActivity {
+public class Schedule_Screen extends AppCompatActivity implements Serializable {
     private FloatingActionButton settingButton;
     private ToggleButton remindOkButton;
     private ToggleButton day0Button;

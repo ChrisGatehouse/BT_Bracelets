@@ -14,11 +14,12 @@ import android.widget.Toast;
 import androidx.core.app.NotificationCompat;
 
 import java.io.Console;
+import java.io.Serializable;
 
 import no.nordicsemi.android.blinky.R;
 import no.nordicsemi.android.blinky.profile.BlinkyManager;
 
-public class AlarmReceiver extends BroadcastReceiver {
+public class AlarmReceiver extends BroadcastReceiver implements Serializable {
     private PowerManager.WakeLock wl;
     private NotificationManager manager;
    // private NotificationChannel channel;
