@@ -7,12 +7,12 @@ CS Capstone - Bluetooth Bracelets
 |Member|Primary Role|Backup Role|
 |:---:|:---:|:---:|
 |Chris Gatehouse|Team Lead|
-|Amanda Williams|Scrum Master / Website | Backup Team Lead/ Licensing|
+|Amanda Williams|Front-end Lead| Team Lead/ Licensing|
 |Kallen Harvey|Front-end / UX|Prototyping|
-|Edward Koroteev|Prototyping|Back-end|
-|Ben Portis|Git Master|Back-end|
-|Lucas Phillips|Back-end|
-|Ian O'Brien|Licensing|Front-end|Website|
+|Edward Koroteev|Back-end|Prototyping|
+|Ben Portis|Back-end Lead|Git Master|
+|Lucas Phillips|Back-end (Hardware)|
+|Ian O'Brien|Front-end|Licensing|Website|
 
 ## Sponsor
 Dan Hahn
