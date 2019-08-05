@@ -1,5 +1,6 @@
 package bt.bracelet.android.capstone;
 
+import android.app.Application;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -57,8 +59,6 @@ import no.nordicsemi.android.log.Logger;
 public class Timer_Screen extends AppCompatActivity  {
 
 
-
-
     /** Nordic Blinky Service UUID. */
     public static UUID LBS_UUID_SERVICE = UUID.fromString("00001523-1212-efde-1523-785feabcd123");
     /** BUTTON characteristic UUID. */
@@ -72,20 +72,13 @@ public class Timer_Screen extends AppCompatActivity  {
     /** Timercharacteristic UUID. */
     private static UUID TIMER_UUID = UUID.fromString("00001528-1212-efde-1523-785feabcd123");
 
-    public Context myContext;
 
     private BluetoothGattCharacteristic mButtonCharacteristic, mLedCharacteristic, mColorCharacteristic, mVibrateCharacteristic, mTimerCharacteristic;
     private LogSession mLogSession;
     private boolean mSupported;
     private boolean mLedOn;
 
-
-
-
     public innter_timer_screen timer_screen;
-
-
-
 
     public BlinkyManager blinky1;
     private TextView countdown;
@@ -103,13 +96,11 @@ public class Timer_Screen extends AppCompatActivity  {
     private NumberPicker secondPicker;
     private TextView textView;
     private FloatingActionButton settingsButton;
-    //public BlinkyManager blinky1;
+
     // Flag that holds the on off state of the ping/vibrate. On is true, Off is False
     private final MutableLiveData<Boolean> mVIBRATEState = new MutableLiveData<>();
-    ////////ADDED FOR BT - JUST TYRING
+
     public static final String EXTRA_DEVICE = "no.nordicsemi.android.blinky.EXTRA_DEVICE";
-    public BlinkyViewModel blinkyViewModel;
-    public BluetoothDevice mDevice;
 
     //global time for the reset.
     private int hours;
@@ -119,39 +110,175 @@ public class Timer_Screen extends AppCompatActivity  {
 
     private Context context;
 
-    public BlinkyManagerCallbacks callbacks;
-    private Object innter_timer_screen;
+   // public BlinkyManagerCallbacks callbacks;
+    public innter_timer_screen innterTimerScreen;
 
 
-    /**
-     * The manager constructor.
-     * <p>
-     * After constructing the manager, the callbacks object must be set with
-     * {@link #)}.
-     * <p>
-     * To connect a device, call {@link #connect(BluetoothDevice)}.
-     *
-     * @param context the context.
-     */
-  //  public Timer_Screen(@NonNull Context context) {
-  //      super(context);
- //   }
+    public class innter_timer_screen extends BleManager<BlinkyManagerCallbacks> implements BlinkyManagerCallbacks{
 
-    /**
-     * The manager constructor.
-     * <p>
-     * After constructing the manager, the callbacks object must be set with
-     * <p>
-  //   * To connect a device, call {@link #(BluetoothDevice)}.
-     *
-  //   * @param context the context.
-     */
-  //  public Timer_Screen(@NonNull Context context) {
- //       super(context.getApplicationContext());
-//    }
-//
 
-    public class innter_timer_screen extends BleManager<BlinkyManagerCallbacks>{
+        public BluetoothDevice mDevice;
+        public Application app;
+        // Connection states Connecting, Connected, Disconnecting, Disconnected etc.
+        private final MutableLiveData<String> mConnectionState = new MutableLiveData<>();
+
+        // Flag to determine if the device is connected
+        private final MutableLiveData<Boolean> mIsConnected = new MutableLiveData<>();
+
+        // Flag to determine if the device has required services
+        private final MutableLiveData<Boolean> mIsSupported = new MutableLiveData<>();
+
+        // Flag to determine if the device is ready
+        private final MutableLiveData<Void> mOnDeviceReady = new MutableLiveData<>();
+
+        // Flag that holds the on off state of the LED. On is true, Off is False
+        private final MutableLiveData<Boolean> mLEDState = new MutableLiveData<>();
+
+        // Flag that holds the pressed released state of the button on the devkit.
+        // Pressed is true, Released is false
+        private final MutableLiveData<Boolean> mButtonState = new MutableLiveData<>();
+
+        public LiveData<Void> isDeviceReady() {
+            return mOnDeviceReady;
+        }
+
+        /*
+        private LiveData<String> getConnectionState() {
+            return mConnectionState;
+        }
+
+        private LiveData<Boolean> isConnected() {
+            return mIsConnected;
+        }
+*/
+        private LiveData<Boolean> getButtonState() {
+            return mButtonState;
+        }
+
+        public LiveData<Boolean> getLEDState() {
+            return mLEDState;
+        }
+
+        public LiveData<Boolean> isSupported() {
+            return mIsSupported;
+        }
+
+        //public static Context myContext;
+        //public static Application myapp;
+
+        /**
+         * Connect to peripheral.
+         */
+        public void connect(@NonNull final DiscoveredBluetoothDevice device) {
+            // Prevent from calling again when called again (screen orientation changed)
+            setGattCallbacks(this);
+            if (mDevice == null) {
+                mDevice = device.getDevice();
+                final LogSession logSession
+                        = Logger.newSession(getApplication(), null, device.getAddress(), device.getName());
+                        setLogger(logSession);
+                reconnect();
+            }
+        }
+
+        /**
+         * Disconnect from peripheral.
+         */
+//        public void disconnect() {
+ //           mDevice = null;
+ //           disconnect().enqueue();
+ //       }
+
+        public void toggleLED(final boolean isOn) {
+            send(isOn);
+            mLEDState.setValue(isOn);
+        }
+
+
+        protected void onCleared() {
+            //super.onCleared();
+            if (isConnected()) {
+                //disconnect();
+            }
+        }
+
+        @Override
+        public void onButtonStateChanged(@NonNull final BluetoothDevice device, final boolean pressed) {
+            mButtonState.postValue(pressed);
+        }
+
+        @Override
+        public void onLedStateChanged(@NonNull final BluetoothDevice device, final boolean on) {
+            mLEDState.postValue(on);
+        }
+
+        @Override
+        public void onDeviceConnecting(@NonNull final BluetoothDevice device) {
+            mConnectionState.postValue(getApplication().getString(R.string.state_connecting));
+        }
+
+        @Override
+        public void onDeviceConnected(@NonNull final BluetoothDevice device) {
+            mIsConnected.postValue(true);
+            mConnectionState.postValue(getApplication().getString(R.string.state_discovering_services));
+        }
+
+        @Override
+        public void onDeviceDisconnecting(@NonNull final BluetoothDevice device) {
+            mIsConnected.postValue(false);
+        }
+
+        @Override
+        public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
+            mIsConnected.postValue(false);
+        }
+
+        @Override
+        public void onLinkLossOccurred(@NonNull final BluetoothDevice device) {
+            mIsConnected.postValue(false);
+        }
+
+        @Override
+        public void onServicesDiscovered(@NonNull final BluetoothDevice device,
+                                         final boolean optionalServicesFound) {
+            mConnectionState.postValue(getApplication().getString(R.string.state_initializing));
+        }
+
+        @Override
+        public void onDeviceReady(@NonNull final BluetoothDevice device) {
+            mIsSupported.postValue(true);
+            mConnectionState.postValue(null);
+            mOnDeviceReady.postValue(null);
+        }
+
+        @Override
+        public void onBondingRequired(@NonNull final BluetoothDevice device) {
+            // Blinky does not require bonding
+        }
+
+        @Override
+        public void onBonded(@NonNull final BluetoothDevice device) {
+            // Blinky does not require bonding
+        }
+
+        @Override
+        public void onBondingFailed(@NonNull final BluetoothDevice device) {
+            // Blinky does not require bonding
+        }
+
+        @Override
+        public void onError(@NonNull final BluetoothDevice device,
+                            @NonNull final String message, final int errorCode) {
+            // TODO implement
+        }
+
+        @Override
+        public void onDeviceNotSupported(@NonNull final BluetoothDevice device) {
+            mConnectionState.postValue(null);
+            mIsSupported.postValue(false);
+        }
+
+
 
         /**
          * The manager constructor.
@@ -173,13 +300,38 @@ public class Timer_Screen extends AppCompatActivity  {
             return mGattCallback;
         }
 
+
+
+        public void connectToDevice(DiscoveredBluetoothDevice device)
+        {
+            //setGattCallbacks(getGattCallback());
+            connect(device.getDevice());
+
+        }
+
+
         /**
          * Sets the log session to be used for low level logging.
-        // * @param session the session, or null, if nRF Logger is not installed.
+         * @param session the session, or null, if nRF Logger is not installed.
          */
-        //public void setLogger(@Nullable LogSession session) {
-         //   this.mLogSession = session;
-       // }
+        public void setLogger(@Nullable LogSession session) {
+            mLogSession = session;
+        }
+
+        /**
+         * Reconnects to previously connected device.
+         * If this device was not supported, its services were cleared on disconnection, so
+         * reconnection may help.
+         */
+        public void reconnect() {
+            setGattCallbacks(this);
+            if (mDevice != null) {
+               connect(mDevice)
+                        .retry(3, 100)
+                        .useAutoConnect(false)
+                        .enqueue();
+            }
+        }
 
         @Override
         public void log(int priority, @NonNull String message) {
@@ -331,7 +483,6 @@ public class Timer_Screen extends AppCompatActivity  {
         public void SendColor(int red, int green, int blue)
         {
             byte[] rgb = new byte[3];
-
             rgb[0] = (byte)blue;
             rgb[1] = (byte)green;
             rgb[2] = (byte)red;
@@ -430,34 +581,16 @@ public class Timer_Screen extends AppCompatActivity  {
             }
         };
 
-
-
-
     }
 
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timer__screen);
-        innter_timer_screen = new innter_timer_screen(getApplicationContext());
-
+        innterTimerScreen = new innter_timer_screen(getApplicationContext());
         Intent btIntent = getIntent();
-        // blinkyViewModel = (BlinkyViewModel) btIntent.getSerializableExtra("blinkyviewmodel");
-
-
-        ////////JUST TYRING
-        //final Intent btIntent = getIntent();
-        // DiscoveredBluetoothDevice device = btIntent.getParcelableExtra(EXTRA_DEVICE);
-        //BlinkyActivity activity = new BlinkyActivity();
-        //BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        //BluetoothDevice devicel = new BluetoothDevice(this);
-        //blinkyViewModel = ViewModelProviders.of(this).get(BlinkyViewModel.class);
-        //blinkyViewModel.mBlinkyManager.setGattCallbacks(this.blinkyViewModel);
-//        mDevice = device.getDevice();
-        //if(device != null) {
-        //   blinkyViewModel.connect(device);
-        // }
-
+        DiscoveredBluetoothDevice device = btIntent.getParcelableExtra(EXTRA_DEVICE);
+        innterTimerScreen.connect(device);
 
         countdown = findViewById(R.id.text_view_countdown);
         startButton = findViewById(R.id.start);
@@ -519,7 +652,6 @@ public class Timer_Screen extends AppCompatActivity  {
             }
         });
 
-        //
 
         // listen for a click on the start button to start or pause the timer
         startButton.setOnClickListener(new View.OnClickListener() {
@@ -565,7 +697,7 @@ public class Timer_Screen extends AppCompatActivity  {
             public void onClick(View v) {
                 Log.d("ping has been pressed", "ping has been pressed");
                 //((innter_timer_screen) innter_timer_screen).SendVibrate(true);
-                ((innter_timer_screen) innter_timer_screen).send(true);
+                innterTimerScreen.send(true);
                 //send signal to watch to vibrate the watch...
                 //context = getApplicationContext();
                 //blinky1 = new BlinkyManager(context);
@@ -592,8 +724,6 @@ public class Timer_Screen extends AppCompatActivity  {
                 // activity.mViewModel.mBlinkyManager = new BlinkyManager(context);
                 //activity.mViewModel.mBlinkyManager.send(true);
 
-
-
                  /*
                     what we can do, is send a signal to the watch to vibrate, and have the watch
                     vibrate until button is reclicked... (much like the start->cancel->back to start functionality.
@@ -604,8 +734,6 @@ public class Timer_Screen extends AppCompatActivity  {
             }
         });
     }
-
-
 
 
     //obtains the current values that the number picker is scrolled through and will output
@@ -635,10 +763,6 @@ public class Timer_Screen extends AppCompatActivity  {
             stopTimer();
         }
         else {
-            /*
-            hours = hourPicker.getValue();
-            minutes = minutePicker.getValue();
-            seconds = secondPicker.getValue();*/
 
             textView.setVisibility(View.INVISIBLE);
             hourPicker.setVisibility(View.INVISIBLE);
@@ -759,82 +883,5 @@ public class Timer_Screen extends AppCompatActivity  {
         timerRunning=false;
     }
 
-/*
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable((Parcelable) this.blinky1, flags);
-        dest.writeParcelable((Parcelable) this.countdown, flags);
-        dest.writeParcelable((Parcelable) this.startButton, flags);
-        dest.writeParcelable((Parcelable) this.resetButton, flags);
-        dest.writeParcelable((Parcelable) this.reserved1Button, flags);
-        dest.writeParcelable((Parcelable) this.schedule, flags);
-        dest.writeParcelable((Parcelable) this.ping, flags);
-        dest.writeParcelable((Parcelable) this.countDownTimer, flags);
-        dest.writeLong(this.timeLeftInMilliseconds);
-        dest.writeByte(this.timerRunning ? (byte) 1 : (byte) 0);
-        dest.writeLong(this.timeLeft);
-        dest.writeParcelable((Parcelable) this.hourPicker, flags);
-        dest.writeParcelable((Parcelable) this.minutePicker, flags);
-        dest.writeParcelable((Parcelable) this.secondPicker, flags);
-        dest.writeParcelable((Parcelable) this.textView, flags);
-        dest.writeParcelable((Parcelable) this.settingsButton, flags);
-        dest.writeParcelable((Parcelable) this.mVIBRATEState, flags);
-        dest.writeParcelable(this.mDevice, flags);
-        dest.writeInt(this.hours);
-        dest.writeInt(this.seconds);
-        dest.writeInt(this.minutes);
-        dest.writeString(this.timeLeftText);
-        dest.writeParcelable((Parcelable) this.context, flags);
-    }
-*/
-/*
-    public Timer_Screen() {
-        super(this.context);
-    }
-*/
-   /*
-    public Timer_Screen(Parcel in) {
-        this.blinky1 = new BlinkyManager(in.readParcelable(BlinkyManager.class.getClassLoader()));
-        this.countdown = in.readParcelable(TextView.class.getClassLoader());
-        this.startButton = in.readParcelable(Button.class.getClassLoader());
-        this.resetButton = in.readParcelable(Button.class.getClassLoader());
-        this.reserved1Button = in.readParcelable(Button.class.getClassLoader());
-        this.schedule = in.readParcelable(Button.class.getClassLoader());
-        this.ping = in.readParcelable(Button.class.getClassLoader());
-        this.countDownTimer = in.readParcelable(CountDownTimer.class.getClassLoader());
-        this.timeLeftInMilliseconds = in.readLong();
-        this.timerRunning = in.readByte() != 0;
-        this.timeLeft = in.readLong();
-        this.hourPicker = in.readParcelable(NumberPicker.class.getClassLoader());
-        this.minutePicker = in.readParcelable(NumberPicker.class.getClassLoader());
-        this.secondPicker = in.readParcelable(NumberPicker.class.getClassLoader());
-        this.textView = in.readParcelable(TextView.class.getClassLoader());
-        this.settingsButton = in.readParcelable(FloatingActionButton.class.getClassLoader());
-        //this.mVIBRATEState = in.readParcelable(MutableLiveData<Boolean>.class.getClassLoader());
-        this.mDevice = in.readParcelable(BluetoothDevice.class.getClassLoader());
-        this.hours = in.readInt();
-        this.seconds = in.readInt();
-        this.minutes = in.readInt();
-        this.timeLeftText = in.readString();
-        this.context = in.readParcelable(Context.class.getClassLoader());
-    }
-
-    public static final Parcelable.Creator<Timer_Screen> CREATOR = new Parcelable.Creator<Timer_Screen>() {
-        @Override
-        public Timer_Screen createFromParcel(Parcel source) {
-            return new Timer_Screen(source);
-        }
-
-        @Override
-        public Timer_Screen[] newArray(int size) {
-            return new Timer_Screen[size];
-        }
-    };
-    */
 }
 

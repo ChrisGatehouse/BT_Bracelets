@@ -124,7 +124,7 @@ public class BlinkyActivity extends AppCompatActivity implements Serializable {
 
 
 			//Bundle b = new Bundle();
-			//intent1.putExtra(this.EXTRA_DEVICE, device);
+			intent1.putExtra(this.EXTRA_DEVICE, device);
 			//intent1.putExtra("blinkyviewmodel", mViewModel);
 			//b.putSerializable("viewmodelkey", this.mViewModel);
 			//setResult(RESULT_OK, intent1);

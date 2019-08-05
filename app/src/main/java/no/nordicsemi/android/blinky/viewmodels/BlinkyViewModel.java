@@ -23,6 +23,8 @@
 package no.nordicsemi.android.blinky.viewmodels;
 
 import android.app.Application;
+
+import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -99,6 +101,7 @@ public class BlinkyViewModel extends AndroidViewModel implements BlinkyManagerCa
 		mBlinkyManager = new BlinkyManager(getApplication());
 		mBlinkyManager.setGattCallbacks(this);
 	}
+
 
 
 	/**
