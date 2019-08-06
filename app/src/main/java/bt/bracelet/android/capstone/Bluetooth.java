@@ -16,11 +16,13 @@ import androidx.appcompat.widget.SwitchCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import no.nordicsemi.android.blinky.R;
+import java.io.Serializable;
 
 import no.nordicsemi.android.blinky.R;
 
-public class Bluetooth extends AppCompatActivity {
+import no.nordicsemi.android.blinky.R;
+
+public class Bluetooth extends AppCompatActivity implements Serializable {
 
     private Switch enable_bt;//enable bluetooth switch
     private SharedPreferences preferences;
