@@ -519,7 +519,6 @@ public class Timer_Screen extends AppCompatActivity  {
             b.order(ByteOrder.LITTLE_ENDIAN); // optional, the initial order of a byte buffer is always BIG_ENDIAN.
             b.putInt(time);
             byte[] result = b.array();
-            Log.i("timer", "hi bitches");
             writeCharacteristic(mTimerCharacteristic, result).with(mTimerCharacteristicCallback).enqueue();
         }
 
@@ -679,7 +678,6 @@ public class Timer_Screen extends AppCompatActivity  {
             public void onClick(View view) {
                 // do some stuff here
                 Intent intent = new Intent(getApplicationContext(), Settings_Screen.class);
-                intent.putExtra(EXTRA_DEVICE, device);
                 startActivity(intent);
             }
         });
@@ -690,7 +688,6 @@ public class Timer_Screen extends AppCompatActivity  {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), Schedule_Screen.class);
-                intent.putExtra(EXTRA_DEVICE, device);
                 startActivity(intent);
             }
         });
@@ -701,6 +698,31 @@ public class Timer_Screen extends AppCompatActivity  {
                 Log.d("ping has been pressed", "ping has been pressed");
                 //((innter_timer_screen) innter_timer_screen).SendVibrate(true);
                 innterTimerScreen.send(true);
+                //send signal to watch to vibrate the watch...
+                //context = getApplicationContext();
+                //blinky1 = new BlinkyManager(context);
+                //mDevice = device.getDevice();
+                //blinky1.send(true);
+                //blinkyViewModel.mBlinkyManager.SendVibrate(true);
+                // blinky1.SendVibrate(true);
+                // blinkyViewModel.disconnect();
+                //blinkyViewModel.mBlinkyManager.connect(mDevice);
+                //blinkyViewModel.reconnect();
+                //blinkyViewModel.toggleLED(true);
+                //blinkyViewModel.mBlinkyManager.send(true);
+                //blinkyViewModel.mBlinkyManager.SendVibrate(true);
+                //blinky1.setGattCallbacks(this.onClick(v));
+                //startActivity(btIntent);
+                //blinky1.send(true);
+                //blinky1.SendVibrate(true);
+                //mVIBRATEState.postValue(true);
+                //mVIBRATEState.setValue(true);
+                //blink1.writeChar
+
+                //context = getApplicationContext();
+                // activity.mViewModel = new BlinkyViewModel(context);
+                // activity.mViewModel.mBlinkyManager = new BlinkyManager(context);
+                //activity.mViewModel.mBlinkyManager.send(true);
 
                  /*
                     what we can do, is send a signal to the watch to vibrate, and have the watch
@@ -776,7 +798,9 @@ public class Timer_Screen extends AppCompatActivity  {
             }
         }.start();
         int seconds_left = (int) TimeUnit.MILLISECONDS.toSeconds(timeLeftInMilliseconds);
-        innterTimerScreen.SendTimer(seconds_left);
+        context = getApplicationContext();
+        blinky1 = new BlinkyManager(context);
+        blinky1.SendTimer(seconds_left);
         startButton.setText("cancel");
         timerRunning = true;
     }
@@ -796,7 +820,9 @@ public class Timer_Screen extends AppCompatActivity  {
         timerRunning = false;
 
         // added for stop timer from blinky manager
-        innterTimerScreen.SendTimer(0);
+        context = getApplicationContext();
+        blinky1 = new BlinkyManager(context);
+        blinky1.SendTimer(0);
 
         //set visibility of scroll and countdown timer
         textView.setVisibility(View.VISIBLE);

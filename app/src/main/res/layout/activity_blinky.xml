@@ -149,6 +149,19 @@
 	</ScrollView>
 
 	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:gravity="bottom"
+		android:orientation="horizontal">
+
+		<Button
+			android:id="@+id/Control_Bracelet"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="2"
+			android:text="Control Bracelet" />
+	</LinearLayout>
+	<LinearLayout
 		android:id="@+id/progress_container"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
