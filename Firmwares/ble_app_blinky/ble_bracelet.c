@@ -110,6 +110,9 @@ uint32_t ble_bracelet_init(ble_bracelet_t * p_bracelet, const ble_bracelet_init_
 
     // Initialize service structure.
     p_bracelet->led_write_handler = p_bracelet_init->led_write_handler;
+    p_bracelet->vibrate_write_handler = p_bracelet_init->vibrate_write_handler;
+    p_bracelet->timer_write_handler = p_bracelet_init->timer_write_handler;
+    p_bracelet->color_write_handler = p_bracelet_init->color_write_handler;
 
     // Add service.
     ble_uuid128_t base_uuid = {BRACELET_UUID_BASE};
