@@ -8,7 +8,7 @@ CS Capstone - Bluetooth Bracelets
 |:---:|:---:|:---:|
 |Chris Gatehouse|Team Lead|
 |Amanda Williams|Front-end Lead| Team Lead/ Licensing|
-|Kallen Harvey|Front-end / UX|Prototyping|
+|Kallen Harvey|Front-end|Prototyping|
 |Edward Koroteev|Back-end|Prototyping|
 |Ben Portis|Back-end Lead|Git Master|
 |Lucas Phillips|Back-end (Hardware)|
