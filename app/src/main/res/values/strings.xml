@@ -21,8 +21,8 @@
   -->
 
 <resources>
-    <string name="app_name">nRF Blinky</string>
-    <string name="feature_name">BLINKY</string>
+    <string name="app_name">nRF Bracey</string>
+    <string name="feature_name">BRACEY</string>
 
     <string name="title">@string/app_name</string>
 
