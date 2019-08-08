@@ -47,6 +47,8 @@ import android.widget.TextView;
 
 
 import java.io.Serializable;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.UUID;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
@@ -65,6 +67,8 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
     private int selectedColor;
     private int defaultColor;
     private static final String preferenceFile = "bt.bracelet.android.capstone";
+    private Button colorChange;
+    private int red,green,blue = 1;
     // added for color sliders
     //Reference the seek bars
     //SeekBar SeekA;
@@ -81,11 +85,11 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
     /** BUTTON characteristic UUID. */
     private static UUID LBS_UUID_BUTTON_CHAR = UUID.fromString("00001524-1212-efde-1523-785feabcd123");
     /** LED characteristic UUID. */
-    private static UUID COLOR_UUID = UUID.fromString("00001525-1212-efde-1523-785feabcd123");
-    //private static UUID LBS_UUID_LED_CHAR = UUID.fromString("00001525-1212-efde-1523-785feabcd123");
+    //private static UUID COLOR_UUID = UUID.fromString("00001525-1212-efde-1523-785feabcd123");
+    private static UUID LBS_UUID_LED_CHAR = UUID.fromString("00001525-1212-efde-1523-785feabcd123");
     /** Color characteristic UUID. */
-    //private static UUID COLOR_UUID = UUID.fromString("00001526-1212-efde-1523-785feabcd123");
-    private static UUID LBS_UUID_LED_CHAR = UUID.fromString("00001526-1212-efde-1523-785feabcd123");
+    private static UUID COLOR_UUID = UUID.fromString("00001526-1212-efde-1523-785feabcd123");
+    //private static UUID LBS_UUID_LED_CHAR = UUID.fromString("00001526-1212-efde-1523-785feabcd123");
      /** Vibrate characteristic UUID. */
     private static UUID VIBRATE_UUID = UUID.fromString("00001527-1212-efde-1523-785feabcd123");
     /** Timercharacteristic UUID. */
@@ -394,6 +398,7 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
                 readCharacteristic(mVibrateCharacteristic).with(mVibrateCallback).enqueue();
                 readCharacteristic(mLedCharacteristic).with(mLedCallback).enqueue();
                 readCharacteristic(mButtonCharacteristic).with(mButtonCallback).enqueue();
+                readCharacteristic(mColorCharacteristic).with(mColorCharacteristicCallback).enqueue();
                 enableNotifications(mButtonCharacteristic).enqueue();
             }
 
@@ -411,6 +416,7 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
                     mVibrateCharacteristic = service.getCharacteristic(VIBRATE_UUID);
                     mColorCharacteristic = service.getCharacteristic(COLOR_UUID);
                     mTimerCharacteristic = service.getCharacteristic(TIMER_UUID);
+
                 }
 
                 // TODO: Do we need to add this for each of our new characteristics?
@@ -425,12 +431,17 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
                     final int rxProperties2 = mVibrateCharacteristic.getProperties();
                     writeRequest2 = (rxProperties2 & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0;
                 }
+                boolean writeRequest3 = false;
+                if (mColorCharacteristic != null) {
+                    final int rxProperties3 = mColorCharacteristic.getProperties();
+                    writeRequest3 = (rxProperties3 & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0;
+                }
 
                 service.addCharacteristic(mVibrateCharacteristic);
                 service.addCharacteristic(mColorCharacteristic);
                 service.addCharacteristic(mTimerCharacteristic);
 
-                mSupported = mButtonCharacteristic != null && mLedCharacteristic != null && mVibrateCharacteristic != null && writeRequest && writeRequest2;
+                mSupported = mButtonCharacteristic != null && mLedCharacteristic != null && mVibrateCharacteristic != null  && mColorCharacteristic != null&& writeRequest && writeRequest2 && writeRequest3;
                 return mSupported;
             }
 
@@ -468,11 +479,20 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
         // Sends a color characteristic to the micro-controller
         public void SendColor(int red, int green, int blue)
         {
+            byte test = 0x01;
+
+           /* ByteBuffer b = ByteBuffer.allocate(3);
+            b.order(ByteOrder.LITTLE_ENDIAN);
+            b.putInt(red);
+            byte [] res = b.array();*/
+            red = 20;
             byte[] rgb = new byte[3];
             rgb[0] = (byte)blue;
             rgb[1] = (byte)green;
             rgb[2] = (byte)red;
+            Log.i("array", ""+rgb);
 
+            //Data.opCode(test)
             writeCharacteristic(mColorCharacteristic, rgb).with(mColorCharacteristicCallback).enqueue();
         }
         public void SendVibrate(boolean on)
@@ -574,6 +594,7 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
         SeekR.setOnSeekBarChangeListener(this);
         SeekG.setOnSeekBarChangeListener(this);
         SeekB.setOnSeekBarChangeListener(this);
+        colorButton = findViewById(R.id.confirm_color);
 
         innterSettingScreen = new innter_setting_screen(getApplicationContext());
         Intent btIntent = getIntent();
@@ -620,6 +641,14 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
                 startActivity(intent);
             }
         });
+
+        colorButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                innterSettingScreen.SendColor(red,green,blue);
+
+            }
+        });
     }
 
     // added for color wheel
@@ -629,9 +658,9 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
         //get current ARGB values
         //int A=SeekA.getProgress();
         int A = 200;
-        int red=SeekR.getProgress();
-        int G=SeekG.getProgress();
-        int B=SeekB.getProgress();
+        red=SeekR.getProgress();
+        green=SeekG.getProgress();
+        blue=SeekB.getProgress();
         //Reference the value changing
         int id=seekBar.getId();
         //Get the chnaged value
@@ -640,12 +669,12 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
         if(id == R.id.seekR)
             red=progress;
         else if(id == R.id.seekG)
-            G=progress;
+            green=progress;
         else if(id == R.id.seekB)
-            B=progress;
+            blue=progress;
         //Build and show the new color
-        ShowColor.setBackgroundColor(Color.argb(A, red,G,B));
-        innterSettingScreen.SendColor(0,78,200);
+        ShowColor.setBackgroundColor(Color.argb(A, red,green,blue));
+        //innterSettingScreen.SendColor(0,78,200);
 
     };
     public void onStartTrackingTouch(SeekBar seekBar) {
