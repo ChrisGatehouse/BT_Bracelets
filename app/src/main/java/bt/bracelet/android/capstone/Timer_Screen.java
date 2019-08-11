@@ -424,6 +424,7 @@ public class Timer_Screen extends AppCompatActivity  {
                     mVibrateCharacteristic = service.getCharacteristic(VIBRATE_UUID);
                     mColorCharacteristic = service.getCharacteristic(COLOR_UUID);
                     mTimerCharacteristic = service.getCharacteristic(TIMER_UUID);
+
                 }
 
                 // TODO: Do we need to add this for each of our new characteristics?
@@ -438,12 +439,17 @@ public class Timer_Screen extends AppCompatActivity  {
                     final int rxProperties2 = mVibrateCharacteristic.getProperties();
                     writeRequest2 = (rxProperties2 & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0;
                 }
+                boolean writeRequest3 = false;
+                if (mColorCharacteristic != null) {
+                    final int rxProperties3 = mColorCharacteristic.getProperties();
+                    writeRequest3 = (rxProperties3 & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0;
+                }
 
                 service.addCharacteristic(mVibrateCharacteristic);
                 service.addCharacteristic(mColorCharacteristic);
                 service.addCharacteristic(mTimerCharacteristic);
 
-                mSupported = mButtonCharacteristic != null && mLedCharacteristic != null && mVibrateCharacteristic != null && writeRequest && writeRequest2;
+                mSupported = mButtonCharacteristic != null && mLedCharacteristic != null && mVibrateCharacteristic != null  && mColorCharacteristic != null && writeRequest && writeRequest2 && writeRequest3;
                 return mSupported;
             }
 
@@ -493,33 +499,25 @@ public class Timer_Screen extends AppCompatActivity  {
         /// sends a vibrate on/off signal to the micro-controller
         public void SendVibrate(boolean on)
         {
-            //byte turningOn = 0x01;
-            //byte turningOff = 0x00;
             byte[] turningOn = new byte[1];
             turningOn[0] = 0x01;
             Log.d("bla", "blabla send vibrate");
-            log(Log.VERBOSE, "Turning vibration " + (on ? "ON" : "OFF") + "...");
             log(Log.DEBUG, "Turning vibration " + (on ? "ON" : "OFF"));
-            //writeCharacteristic(mVibrateCharacteristic, on ? BlinkyLED.turnOn() : BlinkyLED.turnOff())
-            //		.with(mVibrateCallback).enqueue();
-            log(Log.VERBOSE, "Turning LED " + (on ? "ON" : "OFF") + "...");
-            writeCharacteristic(mLedCharacteristic,BlinkyLED.turnOn())
-                    .with(mLedCallback).enqueue();
-
-            send(true);
             writeCharacteristic(mVibrateCharacteristic, turningOn)
                     .with(mVibrateCallback).enqueue();
         }
 
-        // Takes an integer representing time in seconds and converts that value
-        // into a byte array and sends that byte array to the micro-controller
+        /**
+         *        Takes an integer representing time in seconds and converts that value
+         *         into a byte array and sends that byte array to the micro-controller
+         *        */
         public void SendTimer(int time)
         {
             ByteBuffer b = ByteBuffer.allocate(4);
             b.order(ByteOrder.LITTLE_ENDIAN); // optional, the initial order of a byte buffer is always BIG_ENDIAN.
             b.putInt(time);
             byte[] result = b.array();
-            Log.i("timer", "hi bitches");
+            Log.i("timer", "Setting timer to: " + time);
             writeCharacteristic(mTimerCharacteristic, result).with(mTimerCharacteristicCallback).enqueue();
         }
 

@@ -476,44 +476,76 @@ public class Settings_Screen extends AppCompatActivity implements SeekBar.OnSeek
                     .with(mLedCallback).enqueue();
 
         }
-        // Sends a color characteristic to the micro-controller
+
+        /**
+         * Sends a color characteristic to the micro-controller
+         * @param red
+         * @param green
+         * @param blue
+         */
         public void SendColor(int red, int green, int blue)
         {
-            byte test = 0x01;
 
            /* ByteBuffer b = ByteBuffer.allocate(3);
             b.order(ByteOrder.LITTLE_ENDIAN);
             b.putInt(red);
             byte [] res = b.array();*/
-            red = 20;
-            byte[] rgb = new byte[3];
-            rgb[0] = (byte)blue;
-            rgb[1] = (byte)green;
-            rgb[2] = (byte)red;
-            Log.i("array", ""+rgb);
+            //red = 20;
 
-            //Data.opCode(test)
+
+            // If we do this we avoid negative values when converting to bytes...
+            /*
+            if (red > 127)
+                red = 127;
+            if (green > 127)
+                green = 127;
+            if (blue > 127)
+                blue = 127;
+              */
+
+
+            // If we do this we will still get negative values when converting to bytes. This will have to be handled on microcontroller side
+            if (red > 254)
+                red = 254;
+            if (green > 254)
+                green = 254;
+            if (blue > 254)
+                blue = 254;
+
+            if (red < 1)
+                red = 1;
+            if (green < 1)
+                green = 1;
+            if (blue < 1)
+                blue = 1;
+
+            byte[] rgb = new byte[3];
+
+            //rgb[0] = (byte)(blue & 0xFF);
+            //rgb[1] = (byte)(green & 0xFF);
+            //rgb[2] = (byte)(red & 0xFF);
+            rgb[0] = (byte)(blue);
+            rgb[1] = (byte)(green);
+            rgb[2] = (byte)(red);
+            Log.i("array", ""+rgb);
+            Log.d("array input", "b:"+ rgb[0] + "g:" + rgb[1] + "r:" + rgb[2]);
             writeCharacteristic(mColorCharacteristic, rgb).with(mColorCharacteristicCallback).enqueue();
         }
+
+        /**
+         * Writes to the vibrate characteristic
+         * @param on
+         */
         public void SendVibrate(boolean on)
         {
-            //byte turningOn = 0x01;
-            //byte turningOff = 0x00;
             byte[] turningOn = new byte[1];
             turningOn[0] = 0x01;
             Log.d("bla", "blabla send vibrate");
-            log(Log.VERBOSE, "Turning vibration " + (on ? "ON" : "OFF") + "...");
             log(Log.DEBUG, "Turning vibration " + (on ? "ON" : "OFF"));
-            //writeCharacteristic(mVibrateCharacteristic, on ? BlinkyLED.turnOn() : BlinkyLED.turnOff())
-            //		.with(mVibrateCallback).enqueue();
-            log(Log.VERBOSE, "Turning LED " + (on ? "ON" : "OFF") + "...");
-            writeCharacteristic(mLedCharacteristic,BlinkyLED.turnOn())
-                    .with(mLedCallback).enqueue();
-
-            send(true);
             writeCharacteristic(mVibrateCharacteristic, turningOn)
                     .with(mVibrateCallback).enqueue();
         }
+
         /**
          * The vibrate callback will be notified when the vibrate state was read or sent to the target device.
          * <p>

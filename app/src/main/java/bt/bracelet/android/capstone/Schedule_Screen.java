@@ -462,25 +462,21 @@ public class Schedule_Screen extends AppCompatActivity implements Serializable {
                     .with(mLedCallback).enqueue();
 
         }
+
+        /**
+         * Writes to the vibrate characteristic, triggering vibrate on microcontroller
+         * @param on
+         */
         public void SendVibrate(boolean on)
         {
-            //byte turningOn = 0x01;
-            //byte turningOff = 0x00;
             byte[] turningOn = new byte[1];
             turningOn[0] = 0x01;
             Log.d("bla", "blabla send vibrate");
-            log(Log.VERBOSE, "Turning vibration " + (on ? "ON" : "OFF") + "...");
             log(Log.DEBUG, "Turning vibration " + (on ? "ON" : "OFF"));
-            //writeCharacteristic(mVibrateCharacteristic, on ? BlinkyLED.turnOn() : BlinkyLED.turnOff())
-            //		.with(mVibrateCallback).enqueue();
-            log(Log.VERBOSE, "Turning LED " + (on ? "ON" : "OFF") + "...");
-            writeCharacteristic(mLedCharacteristic,BlinkyLED.turnOn())
-                    .with(mLedCallback).enqueue();
-
-            send(true);
             writeCharacteristic(mVibrateCharacteristic, turningOn)
-                    .with(mVibrateCallback).enqueue();
+            		.with(mVibrateCallback).enqueue();
         }
+
         /**
          * The vibrate callback will be notified when the vibrate state was read or sent to the target device.
          * <p>
@@ -789,7 +785,8 @@ public class Schedule_Screen extends AppCompatActivity implements Serializable {
             @Override
             public void onClick(View v) {
 
-                innterSchedScreen.send(true);
+                //innterSchedScreen.send(true);
+                innterSchedScreen.SendVibrate(true);
                 //send signal to watch to vibrate the watch...
                 /*
                 what we can do, is send a signal to the watch to vibrate, and have the watch
