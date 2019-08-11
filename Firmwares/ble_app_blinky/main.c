@@ -119,8 +119,6 @@ int vibrate_flag = 0;
 #define SPI_PIN                         NRF_GPIO_PIN_MAP(1,14)
 #define VIBRATE_PIN                     NRF_GPIO_PIN_MAP(1,13)
 
-//#define ADVERTISING_BUTTON              2                                       // Button to start advertising
-
 BLE_BRACELET_DEF(m_bracelet);                                                             /**< LED Button Service instance. */
 NRF_BLE_GATT_DEF(m_gatt);                                                       /**< GATT module instance. */
 NRF_BLE_QWR_DEF(m_qwr);                                                         /**< Context for the Queued Write module.*/
@@ -298,19 +296,10 @@ static void nrf_qwr_error_handler(uint32_t nrf_error)
  */
 static void led_write_handler(uint16_t conn_handle, ble_bracelet_t * p_bracelet, uint8_t led_state)
 {
-    if (led_state)
-    {
+    if (led_state) {
         bsp_board_led_on(LEDBUTTON_LED);
-        nrf_gpio_pin_write(MAIN_LED, led_state);
-        nrf_gpio_pin_write(SECOND_LED, led_state);
-        NRF_LOG_INFO("Received LED ON!");
-    }
-    else
-    {
+    } else {
         bsp_board_led_off(LEDBUTTON_LED);
-        nrf_gpio_pin_write(MAIN_LED, led_state);
-        nrf_gpio_pin_write(SECOND_LED, led_state);
-        NRF_LOG_INFO("Received LED OFF!");
     }
 }
 
@@ -581,16 +570,12 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
         case LEDBUTTON_BUTTON:
           
             NRF_LOG_INFO("Send button state change.");
-            //advertising_start();
-            //disconnect();
             err_code = ble_bracelet_on_button_change(m_conn_handle, &m_bracelet, button_action);
             if (err_code != NRF_SUCCESS &&
                 err_code != BLE_ERROR_INVALID_CONN_HANDLE &&
                 err_code != NRF_ERROR_INVALID_STATE &&
                 err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING)
             {
-                //advertising_start();
-                //disconnect();
                 APP_ERROR_CHECK(err_code);
             }
             if (button_action == BSP_BUTTON_ACTION_PUSH)
@@ -600,50 +585,16 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 
             break;
         case ADVERTISING_BUTTON:
-            if (button_action == BSP_BUTTON_ACTION_RELEASE)
+            if (button_action == BSP_BUTTON_ACTION_PUSH)
             {
               advertising_start();
             }
             break;
         default:
-            //advertising_start();
             APP_ERROR_HANDLER(pin_no);
             break;
     }
 }
-
-
-/**@brief Function for handling events from the BSP module.
- *
- * @param[in]   event   Event generated when button is pressed.
- */
- /*
-static void bsp_event_handler(bsp_event_t event)
-{
-    SEGGER_RTT_printf(0, "bsp_event_handler function");
-    switch (event)
-    {
-        case BSP_EVENT_SLEEP:
-            sleep_mode_enter();
-            break; // BSP_EVENT_SLEEP
-
-        case BSP_EVENT_KEY_0:
-        	SEGGER_RTT_printf(0, "Button 1 is pressed!\n");
-        	blecomm();
-                advertising_start();
-            break;
-        case BSP_EVENT_KEY_1:
-        	SEGGER_RTT_printf(0, "Button 2 is pressed!\n");
-                advertising_start();
-        	break;
-        case BSP_EVENT_ADVERTISING_START:
-          advertising_start();					
-          break;
-        default:
-            break;
-    }
-}
-*/
 
 /**@brief Function for initializing the button handler module.
  */
@@ -652,7 +603,6 @@ static void buttons_init(void)
     ret_code_t err_code;
 
     //The array must be static because a pointer to it will be saved in the button handler module.
-    
     static app_button_cfg_t buttons[] =
     {
         {LEDBUTTON_BUTTON, false, BUTTON_PULL, button_event_handler},
@@ -662,7 +612,6 @@ static void buttons_init(void)
     err_code = app_button_init(buttons, ARRAY_SIZE(buttons),
                                BUTTON_DETECTION_DELAY);
 
-    // err_code = bsp_event_to_button_action_assign(ADVERTISING_BUTTON, BSP_BUTTON_ACTION_LONG_PUSH, BSP_EVENT_ADVERTISING_START);
      APP_ERROR_CHECK(err_code);
  
 }
@@ -991,7 +940,6 @@ int main(void)
 
     // Start execution.
     NRF_LOG_INFO("App started.");
-   // advertising_start();
 
     // Enter main loop.
     for (;;)
