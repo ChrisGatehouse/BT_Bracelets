@@ -698,7 +698,7 @@ public class Timer_Screen extends AppCompatActivity  {
             public void onClick(View v) {
                 Log.d("ping has been pressed", "ping has been pressed");
                 //((innter_timer_screen) innter_timer_screen).SendVibrate(true);
-                innterTimerScreen.send(true);
+                innterTimerScreen.SendVibrate(true);
 
                  /*
                     what we can do, is send a signal to the watch to vibrate, and have the watch
