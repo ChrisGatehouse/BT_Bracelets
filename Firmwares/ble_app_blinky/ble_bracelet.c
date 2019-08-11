@@ -61,7 +61,7 @@ static void on_write(ble_bracelet_t * p_bracelet, ble_evt_t const * p_ble_evt)
 
     // color handler
     if (   (p_evt_write->handle == p_bracelet->color_char_handles.value_handle)
-        && (p_evt_write->len == 4)
+        && (p_evt_write->len == 3)
         && (p_bracelet->color_write_handler != NULL))
     {
         p_bracelet->color_write_handler(p_ble_evt->evt.gap_evt.conn_handle, p_bracelet, ((uint32_t *)(p_evt_write->data))[0] & 0x00FFFFFF);
