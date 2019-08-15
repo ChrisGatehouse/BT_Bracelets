@@ -104,12 +104,13 @@
 
 #define DEAD_BEEF                       0xDEADBEEF                              /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
-#define NLEDS                           30                                      // Amount of LEDS on the bracelet
+#define NLEDS                           6                                      // Amount of LEDS on the bracelet
 struct ws2812 leds;
 DECLARE_TX_BUFFER(tx_buffer, NLEDS);
 DECLARE_COLOR_BUFFER(colors, NLEDS);
 uint32_t timeout = 0;
-uint32_t color = 0x00FF0000;
+uint32_t color_setting = 0x00FF0000;
+int color_flag = 1;
 int vibrate_flag = 0;
 
 // Our code
@@ -310,7 +311,8 @@ static void led_write_handler(uint16_t conn_handle, ble_bracelet_t * p_bracelet,
  */
 static void color_write_handler(uint16_t conn_handle, ble_bracelet_t * p_bracelet, uint32_t new_color)
 {
-    color = new_color;
+    color_setting = new_color;
+    color_flag = 1;
 }
 
 /**@brief Function for handling write events to the Vibrate characteristic.
@@ -330,7 +332,7 @@ static void vibrate_write_handler(uint16_t conn_handle, ble_bracelet_t * p_brace
  */
 static void timer_write_handler(uint16_t conn_handle, ble_bracelet_t * p_bracelet, uint32_t new_time)
 {
-    timeout = new_time * 1000;
+    timeout = APP_TIMER_TICKS(new_time * 1000);
 }
 
 void blinksomelights()
@@ -635,28 +637,34 @@ static void power_management_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
-void led_count_down()
+void led_count_down(uint32_t timer_amount)
 {
-  uint32_t timeLeft;
-  int lightsOn = 1;
-  int interval = timeout / NLEDS;
+    uint32_t time_left;
+    int lights_on = NLEDS;
+    uint32_t interval = timer_amount / NLEDS;
 
-  while(lightsOn != NLEDS)
-  {
-    timeLeft = (int)((app_timer_cnt_get()) * 1000 / 32768);
-    if((timeLeft > (interval * lightsOn)) && (timeLeft <= ((interval * lightsOn) + interval)))
+    uint32_t start = app_timer_cnt_get();
+
+    while (lights_on > 0)
     {
-      nrf_delay_ms(5);
-      ws2812_set_rgb(&leds, lightsOn - 1, 0, 0, 0);
-      ws2812_spi_show(&leds);
-      lightsOn++;
-    }
-    nrf_delay_ms(5);
-  }
+        if (color_flag) {
+            color_flag = 0;
+            for (int i = 0; i < lights_on; i++) {
+                ws2812_set_int(&leds, i, color_setting);
+                nrf_delay_ms(5);
+                ws2812_spi_show(&leds);
+            }
+        }
 
-  nrf_delay_ms(interval);
-  ws2812_set_rgb(&leds, NLEDS - 1, 0, 0, 0);
-  ws2812_spi_show(&leds);
+        time_left = timer_amount - (app_timer_cnt_get() - start);
+        if (interval * (lights_on - 1) > time_left || time_left < 10) {
+            ws2812_set_int(&leds, lights_on - 1, 0);
+            ws2812_spi_show(&leds);
+            lights_on--;
+        }
+    }
+
+    timeout = 0;
 }
 
 /**@brief Function for handling the idle state (main loop).
@@ -678,26 +686,26 @@ static void all_led_off()
   int delay = 10;
   for(int i = 0; i < NLEDS; i++)
   {
-    ws2812_set_rgb(&leds, i, 0, 0, 0);
+    ws2812_set_int(&leds, i, 0);
   }
   nrf_delay_ms(delay);
   ws2812_spi_show(&leds);
 }
 
-static void flash_show(int r, int g, int b)
+static void flash_show(int color)
 {
   int delay = 200;
   for(int i = 0; i < 3; i++)
   {
     for(int j = 0; j < NLEDS; j++)
     {
-      ws2812_set_rgb(&leds, j, r, g, b);
+      ws2812_set_int(&leds, j, color);
     }
     nrf_delay_ms(delay);
     ws2812_spi_show(&leds);
     for(int j = 0; j < NLEDS; j++)
     {
-      ws2812_set_rgb(&leds, j, 0, 0, 0); 
+      ws2812_set_int(&leds, j, 0); 
     }
     nrf_delay_ms(delay);
     ws2812_spi_show(&leds);
@@ -706,20 +714,20 @@ static void flash_show(int r, int g, int b)
   all_led_off();
 }
 
-static void wave_show(int r, int g, int b)
+static void wave_show(int color)
 {
   int delay = 10;
   for(int i = 0; i < 3; i++)
   {
     for(int j = 0; j < NLEDS; j++)
     {
-      ws2812_set_rgb(&leds, j, r, g, b);
+      ws2812_set_int(&leds, j, color);
       ws2812_spi_show(&leds);
       nrf_delay_ms(delay);
     }
     for(int j = NLEDS - 1; j >= 0; j--)
     {
-      ws2812_set_rgb(&leds, j, 0, 0, 0);
+      ws2812_set_int(&leds, j, 0);
       ws2812_spi_show(&leds);
       nrf_delay_ms(delay);
     }
@@ -728,26 +736,26 @@ static void wave_show(int r, int g, int b)
   all_led_off();
 }
 
-static void single_wave_show(int r, int g, int b)
+static void single_wave_show(int color)
 {
   int delay = 5;
   for(int i = 0; i < 3; i++)
   {
     for(int j = 0; j < NLEDS; j++)
     {
-      ws2812_set_rgb(&leds, j, r, g, b);
+      ws2812_set_int(&leds, j, color);
       ws2812_spi_show(&leds);
       nrf_delay_ms(delay);
-      ws2812_set_rgb(&leds, j, 0, 0, 0);
+      ws2812_set_int(&leds, j, 0);
       ws2812_spi_show(&leds);
       nrf_delay_ms(delay);
     }
     for(int j = NLEDS - 1; j >= 0; j--)
     {
-      ws2812_set_rgb(&leds, j, r, g, b);
+      ws2812_set_int(&leds, j, color);
       ws2812_spi_show(&leds);
       nrf_delay_ms(delay);
-      ws2812_set_rgb(&leds, j, 0, 0, 0);
+      ws2812_set_int(&leds, j, 0);
       ws2812_spi_show(&leds);
       nrf_delay_ms(delay);
     }
@@ -756,7 +764,7 @@ static void single_wave_show(int r, int g, int b)
   all_led_off();
 }
 
-static void shift_show(int r, int g, int b)
+static void shift_show(int color)
 {
   int delay = 300;
   for(int i = 0; i < 9; i += 2)
@@ -765,11 +773,11 @@ static void shift_show(int r, int g, int b)
     {
       if(j % 2)
       {
-        ws2812_set_rgb(&leds, j, r, g, b);
+        ws2812_set_int(&leds, j, color);
       }
       else
       {
-        ws2812_set_rgb(&leds, j, 0, 0, 0);
+        ws2812_set_int(&leds, j, 0);
       }
     }
     nrf_delay_ms(delay);
@@ -778,11 +786,11 @@ static void shift_show(int r, int g, int b)
     {
       if(j % 2 == 0)
       {
-        ws2812_set_rgb(&leds, j, r, g, b);
+        ws2812_set_int(&leds, j, color);
       }
       else
       {
-        ws2812_set_rgb(&leds, j, 0, 0, 0);
+        ws2812_set_int(&leds, j, 0);
       }
     }
 
@@ -795,7 +803,7 @@ static void shift_show(int r, int g, int b)
   all_led_off();
 }
 
-static void from_center_loop_show(int r, int g, int b)
+static void from_center_loop_show(int color)
 {
     int delay = 50;
     int center = NLEDS / 2;
@@ -806,12 +814,12 @@ static void from_center_loop_show(int r, int g, int b)
       {
         if(center + j < NLEDS)
         {
-          ws2812_set_rgb(&leds, center + j, r, g, b);
+          ws2812_set_int(&leds, center + j, color);
         }
 
         if(center - j >= 0)
         {
-          ws2812_set_rgb(&leds, center - j, r, g, b);
+          ws2812_set_int(&leds, center - j, color);
         }
         nrf_delay_ms(delay);
         ws2812_spi_show(&leds);
@@ -819,7 +827,7 @@ static void from_center_loop_show(int r, int g, int b)
 
       for(int k = 0; k < NLEDS; k++)
       {
-        ws2812_set_rgb(&leds, k, 0, 0, 0);
+        ws2812_set_int(&leds, k, 0);
       }
       nrf_delay_ms(delay);
       ws2812_spi_show(&leds);
@@ -831,39 +839,38 @@ static void from_center_loop_show(int r, int g, int b)
     all_led_off();
 }
 
-static void led_complete_show()
+static void led_complete_show(int color)
 {
   int r = 255;
   int g = 0;
   int b = 0;
   int delay = 0;
 
-  flash_show(r, g, b);
+  flash_show(color);
   nrf_delay_ms(delay);
-  wave_show(r, g, b);
+  wave_show(color);
   nrf_delay_ms(delay);
-  single_wave_show(r, g, b);
+  single_wave_show(color);
   nrf_delay_ms(delay);
-  shift_show(r, g, b);
+  shift_show(color);
   nrf_delay_ms(delay);
-  from_center_loop_show(r, g, b);
+  from_center_loop_show(color);
 }
 
 /**@brief Timeout handler for the single shot timer.
  */
 static void single_shot_timer_handler(void * p_context)
 {
-  led_complete_show();
+  led_complete_show(color_setting);
   nrf_delay_ms(50);
 
   for(int i = 0; i < NLEDS; i++)
   {
-    ws2812_set_rgb(&leds, i, 0, 0, 0);
+    ws2812_set_int(&leds, i, 0);
   } 
 
   ws2812_spi_show(&leds);
-
-  timeout = 0;
+  color_flag = 1;
 }
 
 /**@brief Create timers.
@@ -879,26 +886,13 @@ static void create_timer()
 
 static void start_timer(uint32_t timer_amount)
 {
-  uint32_t timeout = 0;
   ret_code_t err_code;
 
-  timeout += timer_amount;
-
-  err_code = app_timer_start(m_single_shot_timer_id, APP_TIMER_TICKS(timeout), NULL);
+  err_code = app_timer_start(m_single_shot_timer_id, timer_amount, NULL);
   APP_ERROR_CHECK(err_code);
-
-  led_count_down();
+  led_count_down(timer_amount);
 }
 
-static void led_color_init(int r, int g, int b)
-{
-  for(int i = 0; i < NLEDS; i++)
-  {
-    ws2812_set_rgb(&leds, i, r, g, b);
-  }
-
-  ws2812_spi_show(&leds);
-}
 //==========================TESTING====================
 static void leds_init(void)
 {
@@ -934,7 +928,6 @@ int main(void)
     conn_params_init();
     app_button_enable();
     ws2812_init(&leds, NLEDS, SPI_PIN, 100, NRF_SPIM0, colors, tx_buffer);
-    led_color_init(255, 0, 0);
     app_timer_init();
     create_timer();
 
@@ -944,6 +937,14 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
+        if (color_flag) {
+            color_flag = 0;
+            for (int i = 0; i < NLEDS; i++) {
+                ws2812_set_int(&leds, i, color_setting);
+                nrf_delay_ms(5);
+                ws2812_spi_show(&leds);
+            }
+        }
         if (vibrate_flag) {
             vibrate_flag = 0;
             nrf_gpio_pin_write(VIBRATE_PIN, 1);
